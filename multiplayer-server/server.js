@@ -95,7 +95,6 @@ wss.on('connection', (ws) => {
       if (room.players.size === 2 && room.readyPlayers.size === 2) {
         room.readyPlayers.clear();
         broadcast(room, { type: 'match_start' });
-        broadcast(room, { type: 'room_update', players: room.players.size, readyPlayers: room.readyPlayers.size });
       }
       return;
     }

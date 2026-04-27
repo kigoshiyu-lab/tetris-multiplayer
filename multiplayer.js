@@ -5,6 +5,7 @@ const multiplayer = (() => {
   let playersInRoom = 0;
   let readyPlayersInRoom = 0;
   let isReadyPressed = false;
+  let matchStarting = false;
   const DEFAULT_WS_URL = 'wss://tetris-multiplayer-8et5.onrender.com';
 
   const statusEl = () => document.getElementById('multiplayerStatus');
@@ -32,6 +33,7 @@ const multiplayer = (() => {
     playersInRoom = 0;
     readyPlayersInRoom = 0;
     isReadyPressed = false;
+    matchStarting = false;
     updateStartButton();
   }
 
@@ -66,7 +68,7 @@ const multiplayer = (() => {
 
     if (isReadyPressed) {
       startBtn.disabled = true;
-      startBtn.textContent = '開始準備OK';
+      startBtn.textContent = matchStarting ? '開始中...' : '開始準備OK';
       return;
     }
 
@@ -80,6 +82,7 @@ const multiplayer = (() => {
     updateStartButton();
 
     if (!joinedRoomId) return;
+    if (matchStarting) return;
 
     if (playersInRoom < 2) {
       setStatus(`接続完了: ${joinedRoomId} / 待機中 (${playersInRoom}/2)`);
@@ -127,6 +130,7 @@ const multiplayer = (() => {
       if (message.type === 'joined_room') {
         joinedRoomId = message.roomId;
         isReadyPressed = false;
+        matchStarting = false;
         updateRoomState(message.players, message.readyPlayers || 0);
         if (typeof window.onRoomJoined === 'function') {
           window.onRoomJoined(message.players);
@@ -145,6 +149,7 @@ const multiplayer = (() => {
       if (message.type === 'match_start') {
         setStatus(`対戦開始: ${joinedRoomId}`);
         isReadyPressed = false;
+        matchStarting = true;
         updateStartButton();
         if (typeof window.onMatchStart === 'function') {
           window.onMatchStart();
@@ -164,6 +169,7 @@ const multiplayer = (() => {
       if (message.type === 'opponent_left') {
         setStatus('相手が退出しました');
         isReadyPressed = false;
+        matchStarting = false;
         updateStartButton();
         if (typeof window.onOpponentLeft === 'function') {
           window.onOpponentLeft();
@@ -190,6 +196,7 @@ const multiplayer = (() => {
       playersInRoom = 0;
       readyPlayersInRoom = 0;
       isReadyPressed = false;
+      matchStarting = false;
       updateStartButton();
       if (typeof window.onRoomLeft === 'function') {
         window.onRoomLeft();
@@ -210,6 +217,7 @@ const multiplayer = (() => {
       setStatus('あなたは準備完了済みです');
       return;
     }
+    matchStarting = false;
     safeSend({ type: 'player_ready' });
   }
 

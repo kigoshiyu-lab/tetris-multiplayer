@@ -406,6 +406,8 @@ function drawBlock(context, x, y, color) {
 
 // ===== Draw Next Piece =====
 function drawNextPiece() {
+    nextCtx.setTransform(1, 0, 0, 1, 0, 0);
+    nextCtx.globalAlpha = 1;
     nextCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
     nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
 
