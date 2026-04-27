@@ -20,6 +20,10 @@
     image-rendering: pixelated;
 }
 
+.hidden {
+    display: none !important;
+}
+
 body {
     font-family: 'Press Start 2P', cursive;
     background-color: #000;
@@ -124,6 +128,12 @@ header {
     font-size: 0.45rem;
     color: var(--nes-gray);
     margin-bottom: 0.4rem;
+}
+
+.lobby-hint {
+    margin-top: 0.5rem;
+    font-size: 0.5rem;
+    color: var(--nes-white);
 }
 
 .mute-btn {
@@ -240,6 +250,25 @@ header {
     justify-content: center;
     align-items: center;
     z-index: 10;
+}
+
+.countdown-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 11;
+    color: var(--nes-yellow);
+    text-shadow: 4px 4px 0 #000;
+}
+
+#countdownText {
+    font-size: 2rem;
 }
 
 .game-over-screen.hidden,

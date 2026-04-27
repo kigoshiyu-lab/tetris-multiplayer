@@ -35,6 +35,7 @@ let gameOver = false;
 let isPaused = false;
 let waitingForOpponent = false;
 let hasActiveRound = false;
+let countdownTimer = null;
 let dropCounter = 0;
 let dropInterval = 1000;
 let lastTime = 0;
@@ -45,6 +46,12 @@ let touchStartY = 0;
 let touchEndX = 0;
 let touchEndY = 0;
 const minSwipeDistance = 30;
+
+const lobbyPanelEl = () => document.getElementById('lobbyPanel');
+const lobbyHintEl = () => document.getElementById('lobbyHint');
+const gameContainerEl = () => document.getElementById('gameContainer');
+const countdownScreenEl = () => document.getElementById('countdownScreen');
+const countdownTextEl = () => document.getElementById('countdownText');
 
 // ===== Initialize Game =====
 function init() {
@@ -105,6 +112,13 @@ function setPauseMessage(text) {
     }
 }
 
+function setLobbyHint(text) {
+    const hintEl = lobbyHintEl();
+    if (hintEl) {
+        hintEl.textContent = text;
+    }
+}
+
 window.onRoomJoined = (players) => {
     if (players < 2) {
         setLobbyState('接続完了。対戦相手を待っています...');
@@ -112,7 +126,8 @@ window.onRoomJoined = (players) => {
 };
 
 window.onMatchStart = () => {
-    startRound();
+    showGameScreen();
+    startCountdownAndRound();
 };
 
 window.onRoomLeft = () => {
@@ -128,6 +143,16 @@ window.onOpponentLeft = () => {
 window.onLobbyWaiting = (message) => {
     setLobbyState(message);
 };
+
+function showLobbyScreen() {
+    lobbyPanelEl().classList.remove('hidden');
+    gameContainerEl().classList.add('hidden');
+}
+
+function showGameScreen() {
+    lobbyPanelEl().classList.add('hidden');
+    gameContainerEl().classList.remove('hidden');
+}
 
 // ===== Create Random Piece =====
 function createPiece() {
@@ -445,6 +470,10 @@ function showGameOver() {
 }
 
 function resetToLobby() {
+    if (countdownTimer) {
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+    }
     board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
     currentPiece = null;
     nextPiece = null;
@@ -459,15 +488,17 @@ function resetToLobby() {
     dropInterval = 1000;
     updateScore();
     drawNextPiece();
+    showLobbyScreen();
+    countdownScreenEl().classList.add('hidden');
     document.getElementById('gameOverScreen').classList.add('hidden');
+    document.getElementById('pauseScreen').classList.add('hidden');
 }
 
 function setLobbyState(message) {
     waitingForOpponent = true;
     isPaused = true;
     hasActiveRound = false;
-    setPauseMessage(message);
-    document.getElementById('pauseScreen').classList.remove('hidden');
+    setLobbyHint(message);
 }
 
 // ===== Start Round =====
@@ -491,6 +522,32 @@ function startRound() {
     nextPiece = createPiece();
     spawnPiece();
     gameAudio.startBGM();
+}
+
+function startCountdownAndRound() {
+    if (countdownTimer) {
+        clearInterval(countdownTimer);
+    }
+
+    const sequence = ['3', '2', '1', 'START'];
+    let index = 0;
+    const overlay = countdownScreenEl();
+    const textEl = countdownTextEl();
+
+    overlay.classList.remove('hidden');
+    textEl.textContent = sequence[index];
+
+    countdownTimer = setInterval(() => {
+        index += 1;
+        if (index >= sequence.length) {
+            clearInterval(countdownTimer);
+            countdownTimer = null;
+            overlay.classList.add('hidden');
+            startRound();
+            return;
+        }
+        textEl.textContent = sequence[index];
+    }, 700);
 }
 
 // ===== Toggle Mute =====

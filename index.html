@@ -21,7 +21,7 @@
             <button id="muteBtn" class="mute-btn">🔊</button>
         </header>
 
-        <section class="multiplayer-panel">
+        <section class="multiplayer-panel" id="lobbyPanel">
             <h2>対戦モード（試験版）</h2>
             <div class="multiplayer-controls">
                 <input id="roomInput" type="text" maxlength="12" placeholder="ROOM123" />
@@ -31,9 +31,10 @@
             </div>
             <p class="multiplayer-note">サーバー接続は自動です。ルームIDだけ入力してください。</p>
             <p id="multiplayerStatus">未接続</p>
+            <p id="lobbyHint" class="lobby-hint">ルーム参加して対戦準備を開始してください。</p>
         </section>
 
-        <div class="game-container">
+        <div class="game-container hidden" id="gameContainer">
             <!-- Left Panel: Next Piece -->
             <div class="side-panel">
                 <div class="panel-card">
@@ -94,6 +95,9 @@
 
                 <div class="game-board-container">
                     <canvas id="gameCanvas" width="300" height="600"></canvas>
+                    <div id="countdownScreen" class="countdown-screen hidden">
+                        <div id="countdownText">3</div>
+                    </div>
                     <div id="gameOverScreen" class="game-over-screen hidden">
                         <div class="game-over-content">
                             <h2 class="game-over-title">ゲームオーバー</h2>
