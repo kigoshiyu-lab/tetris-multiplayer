@@ -35,6 +35,9 @@ const multiplayer = (() => {
   function leaveRoom() {
     cleanupSocket();
     setStatus('切断しました');
+    if (typeof window.onRoomLeft === 'function') {
+      window.onRoomLeft();
+    }
   }
 
   function joinRoom() {
@@ -66,6 +69,9 @@ const multiplayer = (() => {
       if (message.type === 'joined_room') {
         joinedRoomId = message.roomId;
         setStatus(`参加中: ${joinedRoomId} (${message.players}/2)`);
+        if (typeof window.onRoomJoined === 'function') {
+          window.onRoomJoined(message.players);
+        }
         return;
       }
       if (message.type === 'room_update') {
@@ -76,6 +82,9 @@ const multiplayer = (() => {
       }
       if (message.type === 'match_start') {
         setStatus(`対戦開始: ${joinedRoomId}`);
+        if (typeof window.onMatchStart === 'function') {
+          window.onMatchStart();
+        }
         return;
       }
       if (message.type === 'receive_garbage') {
@@ -90,6 +99,9 @@ const multiplayer = (() => {
       }
       if (message.type === 'opponent_left') {
         setStatus('相手が退出しました');
+        if (typeof window.onOpponentLeft === 'function') {
+          window.onOpponentLeft();
+        }
         return;
       }
       if (message.type === 'error') {
@@ -109,6 +121,9 @@ const multiplayer = (() => {
       }
       joinedRoomId = null;
       socket = null;
+      if (typeof window.onRoomLeft === 'function') {
+        window.onRoomLeft();
+      }
     };
   }
 

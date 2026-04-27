@@ -33,6 +33,7 @@ let lines = 0;
 let level = 1;
 let gameOver = false;
 let isPaused = false;
+let waitingForOpponent = false;
 let dropCounter = 0;
 let dropInterval = 1000;
 let lastTime = 0;
@@ -95,6 +96,41 @@ function addGarbageLines(amount) {
 
 window.onReceiveGarbage = (amount) => {
     addGarbageLines(amount);
+};
+
+function setPauseMessage(text) {
+    const messageEl = document.getElementById('pauseMessage');
+    if (messageEl) {
+        messageEl.textContent = text;
+    }
+}
+
+window.onRoomJoined = (players) => {
+    if (players < 2) {
+        waitingForOpponent = true;
+        isPaused = true;
+        setPauseMessage('対戦相手を待っています...');
+        document.getElementById('pauseScreen').classList.remove('hidden');
+    }
+};
+
+window.onMatchStart = () => {
+    waitingForOpponent = false;
+    setPauseMessage('Pキーで再開');
+    restart();
+};
+
+window.onRoomLeft = () => {
+    waitingForOpponent = false;
+    setPauseMessage('Pキーで再開');
+    document.getElementById('pauseScreen').classList.add('hidden');
+};
+
+window.onOpponentLeft = () => {
+    waitingForOpponent = true;
+    isPaused = true;
+    setPauseMessage('相手が退出しました。待機中...');
+    document.getElementById('pauseScreen').classList.remove('hidden');
 };
 
 // ===== Create Random Piece =====
@@ -273,7 +309,7 @@ function handleKeyPress(e) {
 
 // ===== Toggle Pause =====
 function togglePause() {
-    if (gameOver) return;
+    if (gameOver || waitingForOpponent) return;
     isPaused = !isPaused;
     document.getElementById('pauseScreen').classList.toggle('hidden', !isPaused);
 
@@ -419,6 +455,7 @@ function restart() {
     isPaused = false;
     dropCounter = 0;
     dropInterval = 1000;
+    setPauseMessage('Pキーで再開');
 
     document.getElementById('gameOverScreen').classList.add('hidden');
     document.getElementById('pauseScreen').classList.add('hidden');
@@ -462,6 +499,11 @@ function setupMobileControls() {
         if (movePiece(0, 1)) {
             score += 1;
         }
+    });
+
+    document.getElementById('upBtn').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        hardDrop();
     });
 
     document.getElementById('rotateBtn').addEventListener('touchstart', (e) => {
