@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>テトリス - Modern Tetris Game</title>
+    <meta name="description" content="美しいデザインのモダンなテトリスゲーム">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1 class="game-title">
+                <span class="title-gradient">TETRIS</span>
+            </h1>
+            <button id="muteBtn" class="mute-btn">🔊</button>
+        </header>
+
+        <section class="multiplayer-panel">
+            <h2>対戦モード（試験版）</h2>
+            <div class="multiplayer-controls">
+                <input id="serverUrlInput" type="text" placeholder="wss://your-render-server.onrender.com" />
+                <input id="roomInput" type="text" maxlength="12" placeholder="ROOM123" />
+                <button id="joinRoomBtn">ルーム参加</button>
+                <button id="leaveRoomBtn">切断</button>
+            </div>
+            <p id="multiplayerStatus">未接続</p>
+        </section>
+
+        <div class="game-container">
+            <!-- Left Panel: Next Piece -->
+            <div class="side-panel">
+                <div class="panel-card">
+                    <h2>次のピース</h2>
+                    <canvas id="nextCanvas" width="120" height="120"></canvas>
+                </div>
+                <div class="panel-card controls-info">
+                    <h2>操作方法</h2>
+                    <div class="control-item">
+                        <span class="key">←→</span>
+                        <span>移動</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="key">↑</span>
+                        <span>回転</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="key">↓</span>
+                        <span>高速落下</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="key">SPACE</span>
+                        <span>即座に落下</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="key">P</span>
+                        <span>一時停止</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Game Board -->
+            <div class="game-board-container">
+                <canvas id="gameCanvas" width="300" height="600"></canvas>
+                <div id="gameOverScreen" class="game-over-screen hidden">
+                    <div class="game-over-content">
+                        <h2 class="game-over-title">ゲームオーバー</h2>
+                        <p class="final-score">スコア: <span id="finalScore">0</span></p>
+                        <button id="restartBtn" class="restart-btn">もう一度プレイ</button>
+                    </div>
+                </div>
+                <div id="pauseScreen" class="pause-screen hidden">
+                    <div class="pause-content">
+                        <h2>一時停止</h2>
+                        <p>Pキーで再開</p>
+                    </div>
+                </div>
+
+                <!-- Mobile Touch Controls -->
+                <div class="mobile-controls" id="mobileControls">
+                    <div class="control-row">
+                        <button class="control-btn" id="rotateBtn" aria-label="回転">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path
+                                    d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+                            </svg>
+                        </button>
+                        <button class="control-btn" id="hardDropBtn" aria-label="即座に落下">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14M19 12l-7 7-7-7" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="control-row">
+                        <button class="control-btn" id="leftBtn" aria-label="左移動">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 12H5M12 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <button class="control-btn" id="downBtn" aria-label="高速落下">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14M19 12l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <button class="control-btn" id="rightBtn" aria-label="右移動">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Score & Level -->
+            <div class="side-panel">
+                <div class="panel-card">
+                    <h2>スコア</h2>
+                    <div class="score-display" id="score">0</div>
+                </div>
+                <div class="panel-card">
+                    <h2>ライン</h2>
+                    <div class="score-display" id="lines">0</div>
+                </div>
+                <div class="panel-card">
+                    <h2>レベル</h2>
+                    <div class="score-display" id="level">1</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="audio.js"></script>
+    <script src="multiplayer.js"></script>
+    <script src="game.js"></script>
+</body>
+
+</html>

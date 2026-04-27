@@ -1,0 +1,344 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* ===== Retro CSS Custom Properties ===== */
+:root {
+    --bg-primary: #000;
+    --nes-red: #e41212;
+    --nes-blue: #0050ee;
+    --nes-green: #00a800;
+    --nes-yellow: #f8b800;
+    --nes-white: #f8f8f8;
+    --nes-gray: #7c7c7c;
+    --border-pixel: 4px solid #fff;
+}
+
+/* ===== Global Styles ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    image-rendering: pixelated;
+}
+
+body {
+    font-family: 'Press Start 2P', cursive;
+    background-color: #000;
+    color: var(--nes-white);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    line-height: 1.5;
+}
+
+/* CRT Scanline Effect */
+body::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 999;
+    background-size: 100% 4px, 3px 100%;
+    pointer-events: none;
+}
+
+/* ===== Container ===== */
+.container {
+    position: relative;
+    z-index: 1;
+    padding: 1rem;
+    max-width: 1000px;
+    width: 100%;
+    border: 8px solid var(--nes-white);
+    background: #000;
+}
+
+/* ===== Header ===== */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 4px solid var(--nes-white);
+    padding-bottom: 1rem;
+}
+
+.multiplayer-panel {
+    border: 4px solid var(--nes-blue);
+    background: #111;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.multiplayer-panel h2 {
+    font-size: 0.65rem;
+    color: var(--nes-blue);
+    margin-bottom: 0.75rem;
+}
+
+.multiplayer-controls {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr auto auto;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.multiplayer-controls input,
+.multiplayer-controls button {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.55rem;
+    padding: 0.5rem;
+    border: 2px solid #000;
+}
+
+.multiplayer-controls input {
+    background: #222;
+    color: #fff;
+}
+
+.multiplayer-controls button {
+    background: var(--nes-yellow);
+    color: #000;
+    cursor: pointer;
+}
+
+#multiplayerStatus {
+    font-size: 0.5rem;
+    color: var(--nes-white);
+    min-height: 1.2em;
+}
+
+.mute-btn {
+    background: var(--nes-gray);
+    border: 4px solid #000;
+    color: #000;
+    padding: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 #333;
+}
+
+.mute-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 #333;
+}
+
+.game-title {
+    font-size: 1.5rem;
+    color: var(--nes-red);
+    text-shadow: 4px 4px 0 #000;
+}
+
+/* ===== Game Container ===== */
+.game-container {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* ===== Side Panels ===== */
+.side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 180px;
+}
+
+.panel-card {
+    background: #111;
+    border: 4px solid var(--nes-gray);
+    padding: 1rem;
+    text-align: center;
+}
+
+.panel-card h2 {
+    font-size: 0.6rem;
+    color: var(--nes-yellow);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+
+.score-display {
+    font-size: 1.2rem;
+    color: var(--nes-white);
+}
+
+/* ===== Next Piece Canvas ===== */
+#nextCanvas {
+    display: block;
+    margin: 0 auto;
+    background: #000;
+    border: 2px solid var(--nes-gray);
+}
+
+/* ===== Controls Info ===== */
+.controls-info {
+    font-size: 0.5rem;
+}
+
+.control-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    color: var(--nes-gray);
+}
+
+.key {
+    background: #333;
+    padding: 0.2rem;
+    color: #fff;
+    border: 1px solid var(--nes-white);
+}
+
+/* ===== Game Board ===== */
+.game-board-container {
+    position: relative;
+    border: 8px solid var(--nes-gray);
+}
+
+#gameCanvas {
+    display: block;
+    background: #000;
+}
+
+/* ===== Screens ===== */
+.game-over-screen,
+.pause-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.game-over-screen.hidden,
+.pause-screen.hidden {
+    display: none;
+}
+
+.game-over-content,
+.pause-content {
+    text-align: center;
+    border: 4px solid var(--nes-red);
+    padding: 2rem;
+    background: #000;
+}
+
+.game-over-title,
+.pause-content h2 {
+    font-size: 1.2rem;
+    color: var(--nes-red);
+    margin-bottom: 1rem;
+}
+
+.final-score {
+    font-size: 0.8rem;
+    margin-bottom: 2rem;
+}
+
+.restart-btn {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.7rem;
+    padding: 1rem;
+    background: var(--nes-green);
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 #000;
+}
+
+.restart-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 #000;
+}
+
+/* ===== Mobile Touch Controls ===== */
+.mobile-controls {
+    display: none;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.control-row {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.control-btn {
+    width: 50px;
+    height: 50px;
+    background: var(--nes-gray);
+    border: 3px solid #000;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+}
+
+.control-btn svg {
+    width: 24px;
+    height: 24px;
+    stroke: #000;
+}
+
+.control-btn:active {
+    transform: translate(2px, 2px);
+    background: #555;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 1024px) {
+    .game-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .side-panel {
+        flex-direction: row;
+        width: 100%;
+    }
+
+    .panel-card {
+        flex: 1;
+    }
+
+    .mobile-controls {
+        display: flex;
+    }
+
+    .controls-info {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .game-title {
+        font-size: 1rem;
+    }
+
+    #gameCanvas {
+        width: 200px !important;
+        height: 400px !important;
+    }
+
+    .multiplayer-controls {
+        grid-template-columns: 1fr;
+    }
+}
