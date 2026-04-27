@@ -2,9 +2,9 @@ const multiplayer = (() => {
   let socket = null;
   let joinedRoomId = null;
   let currentStatus = '未接続';
+  const DEFAULT_WS_URL = 'wss://tetris-multiplayer-8et5.onrender.com';
 
   const statusEl = () => document.getElementById('multiplayerStatus');
-  const serverInputEl = () => document.getElementById('serverUrlInput');
   const roomInputEl = () => document.getElementById('roomInput');
   const joinBtnEl = () => document.getElementById('joinRoomBtn');
   const leaveBtnEl = () => document.getElementById('leaveRoomBtn');
@@ -13,12 +13,6 @@ const multiplayer = (() => {
     currentStatus = text;
     const el = statusEl();
     if (el) el.textContent = text;
-  }
-
-  function getDefaultWsUrl() {
-    const fromStorage = localStorage.getItem('tetris_ws_url');
-    if (fromStorage) return fromStorage;
-    return 'ws://localhost:8080';
   }
 
   function cleanupSocket() {
@@ -44,19 +38,14 @@ const multiplayer = (() => {
   }
 
   function joinRoom() {
-    const serverUrl = serverInputEl().value.trim();
+    const serverUrl = DEFAULT_WS_URL;
     const roomId = roomInputEl().value.trim().toUpperCase();
 
-    if (!serverUrl) {
-      setStatus('サーバーURLを入力してください');
-      return;
-    }
     if (!roomId) {
       setStatus('ルームIDを入力してください');
       return;
     }
 
-    localStorage.setItem('tetris_ws_url', serverUrl);
     cleanupSocket();
 
     setStatus('接続中...');
@@ -134,7 +123,6 @@ const multiplayer = (() => {
   }
 
   function initUI() {
-    serverInputEl().value = getDefaultWsUrl();
     joinBtnEl().addEventListener('click', joinRoom);
     leaveBtnEl().addEventListener('click', leaveRoom);
     setStatus(currentStatus);

@@ -84,7 +84,7 @@ header {
 
 .multiplayer-controls {
     display: grid;
-    grid-template-columns: 1.5fr 1fr auto auto;
+    grid-template-columns: 1fr auto auto;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
 }
@@ -112,6 +112,12 @@ header {
     font-size: 0.5rem;
     color: var(--nes-white);
     min-height: 1.2em;
+}
+
+.multiplayer-note {
+    font-size: 0.45rem;
+    color: var(--nes-gray);
+    margin-bottom: 0.4rem;
 }
 
 .mute-btn {
