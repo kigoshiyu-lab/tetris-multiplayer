@@ -8,7 +8,8 @@ const rooms = new Map();
 function getOrCreateRoom(roomId) {
   if (!rooms.has(roomId)) {
     rooms.set(roomId, {
-      players: new Set()
+      players: new Set(),
+      readyPlayers: new Set()
     });
   }
   return rooms.get(roomId);
@@ -33,8 +34,10 @@ function removeFromRoom(ws) {
   if (!roomId || !rooms.has(roomId)) return;
 
   const room = rooms.get(roomId);
+  room.readyPlayers.delete(ws);
   room.players.delete(ws);
   broadcast(room, { type: 'opponent_left' }, ws);
+  broadcast(room, { type: 'room_update', players: room.players.size, readyPlayers: room.readyPlayers.size });
 
   if (room.players.size === 0) {
     rooms.delete(roomId);
@@ -71,12 +74,28 @@ wss.on('connection', (ws) => {
 
       room.players.add(ws);
       ws.meta.roomId = roomId;
+      room.readyPlayers.delete(ws);
 
-      send(ws, { type: 'joined_room', roomId, players: room.players.size });
-      broadcast(room, { type: 'room_update', players: room.players.size });
+      send(ws, { type: 'joined_room', roomId, players: room.players.size, readyPlayers: room.readyPlayers.size });
+      broadcast(room, { type: 'room_update', players: room.players.size, readyPlayers: room.readyPlayers.size });
+      return;
+    }
 
-      if (room.players.size === 2) {
+    if (message.type === 'player_ready') {
+      const roomId = ws.meta.roomId;
+      if (!roomId || !rooms.has(roomId)) return;
+      const room = rooms.get(roomId);
+
+      if (!room.players.has(ws)) return;
+      room.readyPlayers.add(ws);
+
+      send(ws, { type: 'ready_ack' });
+      broadcast(room, { type: 'room_update', players: room.players.size, readyPlayers: room.readyPlayers.size });
+
+      if (room.players.size === 2 && room.readyPlayers.size === 2) {
+        room.readyPlayers.clear();
         broadcast(room, { type: 'match_start' });
+        broadcast(room, { type: 'room_update', players: room.players.size, readyPlayers: room.readyPlayers.size });
       }
       return;
     }

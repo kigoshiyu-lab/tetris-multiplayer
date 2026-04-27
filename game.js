@@ -34,6 +34,7 @@ let level = 1;
 let gameOver = false;
 let isPaused = false;
 let waitingForOpponent = false;
+let hasActiveRound = false;
 let dropCounter = 0;
 let dropInterval = 1000;
 let lastTime = 0;
@@ -57,7 +58,7 @@ function init() {
 
     // Event listeners
     document.addEventListener('keydown', handleKeyPress);
-    document.getElementById('restartBtn').addEventListener('click', restart);
+    document.getElementById('restartBtn').addEventListener('click', () => multiplayer.readyForStart());
     document.getElementById('muteBtn').addEventListener('click', toggleMute);
 
     // Mobile touch controls
@@ -72,9 +73,8 @@ function init() {
         }
     }, { once: true });
 
-    // Start game
-    nextPiece = createPiece();
-    spawnPiece();
+    resetToLobby();
+    setLobbyState('ルーム参加して対戦を開始してください');
     update();
 }
 
@@ -107,30 +107,26 @@ function setPauseMessage(text) {
 
 window.onRoomJoined = (players) => {
     if (players < 2) {
-        waitingForOpponent = true;
-        isPaused = true;
-        setPauseMessage('対戦相手を待っています...');
-        document.getElementById('pauseScreen').classList.remove('hidden');
+        setLobbyState('接続完了。対戦相手を待っています...');
     }
 };
 
 window.onMatchStart = () => {
-    waitingForOpponent = false;
-    setPauseMessage('Pキーで再開');
-    restart();
+    startRound();
 };
 
 window.onRoomLeft = () => {
-    waitingForOpponent = false;
-    setPauseMessage('Pキーで再開');
-    document.getElementById('pauseScreen').classList.add('hidden');
+    resetToLobby();
+    setLobbyState('ルーム参加して対戦を開始してください');
 };
 
 window.onOpponentLeft = () => {
-    waitingForOpponent = true;
-    isPaused = true;
-    setPauseMessage('相手が退出しました。待機中...');
-    document.getElementById('pauseScreen').classList.remove('hidden');
+    resetToLobby();
+    setLobbyState('相手が退出しました。ルームで待機中...');
+};
+
+window.onLobbyWaiting = (message) => {
+    setLobbyState(message);
 };
 
 // ===== Create Random Piece =====
@@ -182,7 +178,7 @@ function checkCollision(x, y, shape) {
 
 // ===== Move Piece =====
 function movePiece(dx, dy) {
-    if (gameOver || isPaused) return;
+    if (gameOver || isPaused || !hasActiveRound) return;
 
     const newX = currentPiece.x + dx;
     const newY = currentPiece.y + dy;
@@ -198,7 +194,7 @@ function movePiece(dx, dy) {
 
 // ===== Rotate Piece =====
 function rotatePiece() {
-    if (gameOver || isPaused) return;
+    if (gameOver || isPaused || !hasActiveRound) return;
 
     const rotated = currentPiece.shape[0].map((_, i) =>
         currentPiece.shape.map(row => row[i]).reverse()
@@ -212,7 +208,7 @@ function rotatePiece() {
 
 // ===== Hard Drop =====
 function hardDrop() {
-    if (gameOver || isPaused) return;
+    if (gameOver || isPaused || !hasActiveRound) return;
 
     while (movePiece(0, 1)) {
         score += 2;
@@ -309,7 +305,7 @@ function handleKeyPress(e) {
 
 // ===== Toggle Pause =====
 function togglePause() {
-    if (gameOver || waitingForOpponent) return;
+    if (gameOver || waitingForOpponent || !hasActiveRound) return;
     isPaused = !isPaused;
     document.getElementById('pauseScreen').classList.toggle('hidden', !isPaused);
 
@@ -327,6 +323,8 @@ function update(time = 0) {
         requestAnimationFrame(update);
     }
 
+    draw();
+
     if (isPaused) {
         return;
     }
@@ -341,8 +339,6 @@ function update(time = 0) {
         }
         dropCounter = 0;
     }
-
-    draw();
 }
 
 // ===== Draw Game Board =====
@@ -442,17 +438,46 @@ function showGameOver() {
     document.getElementById('gameOverScreen').classList.remove('hidden');
     gameAudio.stopBGM();
     gameAudio.playGameOver();
+    hasActiveRound = false;
     multiplayer.notifyLost();
 }
 
-// ===== Restart Game =====
-function restart() {
+function resetToLobby() {
+    board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+    currentPiece = null;
+    nextPiece = null;
+    score = 0;
+    lines = 0;
+    level = 1;
+    gameOver = false;
+    isPaused = true;
+    waitingForOpponent = true;
+    hasActiveRound = false;
+    dropCounter = 0;
+    dropInterval = 1000;
+    updateScore();
+    drawNextPiece();
+    document.getElementById('gameOverScreen').classList.add('hidden');
+}
+
+function setLobbyState(message) {
+    waitingForOpponent = true;
+    isPaused = true;
+    hasActiveRound = false;
+    setPauseMessage(message);
+    document.getElementById('pauseScreen').classList.remove('hidden');
+}
+
+// ===== Start Round =====
+function startRound() {
     board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
     score = 0;
     lines = 0;
     level = 1;
     gameOver = false;
     isPaused = false;
+    waitingForOpponent = false;
+    hasActiveRound = true;
     dropCounter = 0;
     dropInterval = 1000;
     setPauseMessage('Pキーで再開');
@@ -464,7 +489,6 @@ function restart() {
     nextPiece = createPiece();
     spawnPiece();
     gameAudio.startBGM();
-    update();
 }
 
 // ===== Toggle Mute =====

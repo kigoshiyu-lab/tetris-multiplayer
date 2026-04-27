@@ -2,12 +2,16 @@ const multiplayer = (() => {
   let socket = null;
   let joinedRoomId = null;
   let currentStatus = '未接続';
+  let playersInRoom = 0;
+  let readyPlayersInRoom = 0;
+  let isReadyPressed = false;
   const DEFAULT_WS_URL = 'wss://tetris-multiplayer-8et5.onrender.com';
 
   const statusEl = () => document.getElementById('multiplayerStatus');
   const roomInputEl = () => document.getElementById('roomInput');
   const joinBtnEl = () => document.getElementById('joinRoomBtn');
   const leaveBtnEl = () => document.getElementById('leaveRoomBtn');
+  const startBtnEl = () => document.getElementById('startGameBtn');
 
   function setStatus(text) {
     currentStatus = text;
@@ -25,6 +29,10 @@ const multiplayer = (() => {
     }
     socket = null;
     joinedRoomId = null;
+    playersInRoom = 0;
+    readyPlayersInRoom = 0;
+    isReadyPressed = false;
+    updateStartButton();
   }
 
   function safeSend(payload) {
@@ -37,6 +45,56 @@ const multiplayer = (() => {
     setStatus('切断しました');
     if (typeof window.onRoomLeft === 'function') {
       window.onRoomLeft();
+    }
+  }
+
+  function updateStartButton() {
+    const startBtn = startBtnEl();
+    if (!startBtn) return;
+
+    if (!joinedRoomId) {
+      startBtn.disabled = true;
+      startBtn.textContent = 'ゲームを開始します';
+      return;
+    }
+
+    if (playersInRoom < 2) {
+      startBtn.disabled = true;
+      startBtn.textContent = '相手を待機中';
+      return;
+    }
+
+    if (isReadyPressed) {
+      startBtn.disabled = true;
+      startBtn.textContent = '開始準備OK';
+      return;
+    }
+
+    startBtn.disabled = false;
+    startBtn.textContent = 'ゲームを開始します';
+  }
+
+  function updateRoomState(players, readyPlayers) {
+    playersInRoom = players;
+    readyPlayersInRoom = readyPlayers;
+    updateStartButton();
+
+    if (!joinedRoomId) return;
+
+    if (playersInRoom < 2) {
+      setStatus(`接続完了: ${joinedRoomId} / 待機中 (${playersInRoom}/2)`);
+      if (typeof window.onLobbyWaiting === 'function') {
+        window.onLobbyWaiting('接続完了。相手の参加を待っています...');
+      }
+      return;
+    }
+
+    if (readyPlayersInRoom < 2) {
+      setStatus(`2人接続済み: 開始準備 ${readyPlayersInRoom}/2`);
+      if (typeof window.onLobbyWaiting === 'function') {
+        window.onLobbyWaiting(`両者の開始待ち (${readyPlayersInRoom}/2)`);
+      }
+      return;
     }
   }
 
@@ -68,20 +126,26 @@ const multiplayer = (() => {
 
       if (message.type === 'joined_room') {
         joinedRoomId = message.roomId;
-        setStatus(`参加中: ${joinedRoomId} (${message.players}/2)`);
+        isReadyPressed = false;
+        updateRoomState(message.players, message.readyPlayers || 0);
         if (typeof window.onRoomJoined === 'function') {
           window.onRoomJoined(message.players);
         }
         return;
       }
       if (message.type === 'room_update') {
-        if (joinedRoomId) {
-          setStatus(`参加中: ${joinedRoomId} (${message.players}/2)`);
-        }
+        updateRoomState(message.players, message.readyPlayers || 0);
+        return;
+      }
+      if (message.type === 'ready_ack') {
+        isReadyPressed = true;
+        updateStartButton();
         return;
       }
       if (message.type === 'match_start') {
         setStatus(`対戦開始: ${joinedRoomId}`);
+        isReadyPressed = false;
+        updateStartButton();
         if (typeof window.onMatchStart === 'function') {
           window.onMatchStart();
         }
@@ -99,6 +163,8 @@ const multiplayer = (() => {
       }
       if (message.type === 'opponent_left') {
         setStatus('相手が退出しました');
+        isReadyPressed = false;
+        updateStartButton();
         if (typeof window.onOpponentLeft === 'function') {
           window.onOpponentLeft();
         }
@@ -121,10 +187,30 @@ const multiplayer = (() => {
       }
       joinedRoomId = null;
       socket = null;
+      playersInRoom = 0;
+      readyPlayersInRoom = 0;
+      isReadyPressed = false;
+      updateStartButton();
       if (typeof window.onRoomLeft === 'function') {
         window.onRoomLeft();
       }
     };
+  }
+
+  function readyForStart() {
+    if (!joinedRoomId) {
+      setStatus('先にルーム参加してください');
+      return;
+    }
+    if (playersInRoom < 2) {
+      setStatus('相手の参加を待っています');
+      return;
+    }
+    if (isReadyPressed) {
+      setStatus('あなたは準備完了済みです');
+      return;
+    }
+    safeSend({ type: 'player_ready' });
   }
 
   function sendGarbage(amount) {
@@ -140,11 +226,14 @@ const multiplayer = (() => {
   function initUI() {
     joinBtnEl().addEventListener('click', joinRoom);
     leaveBtnEl().addEventListener('click', leaveRoom);
+    startBtnEl().addEventListener('click', readyForStart);
+    updateStartButton();
     setStatus(currentStatus);
   }
 
   return {
     initUI,
+    readyForStart,
     sendGarbage,
     notifyLost
   };
