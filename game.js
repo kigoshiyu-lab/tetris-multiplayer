@@ -535,13 +535,15 @@ function init() {
     multiplayer.initUI();
     updateItemUI();
 
-    // Resume audio context on first user interaction
-    document.addEventListener('click', () => {
+    // Resume audio context on first user interaction.
+    // Mobile browsers may suppress click after touch handlers, so listen to touch/pointer too.
+    const unlockAudio = () => {
         gameAudio.resume();
-        if (!gameAudio.isPlaying) {
-            gameAudio.startBGM();
-        }
-    }, { once: true });
+        gameAudio.startBGM();
+    };
+    document.addEventListener('click', unlockAudio, { once: true });
+    document.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
+    document.addEventListener('pointerdown', unlockAudio, { once: true });
 
     resetToLobby();
     setLobbyState('ルーム参加して対戦を開始してください');

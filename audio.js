@@ -251,11 +251,17 @@ class ChiptuneAudio {
             this.currentAudioBgm.currentTime = 0;
         }
         this.currentAudioBgm = next;
-        this.isPlaying = true;
 
         const playPromise = next.play();
+        if (!playPromise) {
+            this.isPlaying = true;
+            return;
+        }
+        this.isPlaying = true;
         if (playPromise && typeof playPromise.catch === 'function') {
-            playPromise.catch(() => { });
+            playPromise.catch(() => {
+                this.isPlaying = false;
+            });
         }
     }
 
