@@ -36,6 +36,7 @@ let isPaused = false;
 let waitingForOpponent = false;
 let hasActiveRound = false;
 let countdownTimer = null;
+let disconnectReturnTimer = null;
 let dropCounter = 0;
 let dropInterval = 1000;
 let lastTime = 0;
@@ -369,8 +370,7 @@ window.onRoomLeft = () => {
 };
 
 window.onOpponentLeft = () => {
-    resetToLobby();
-    setLobbyState('相手が退出しました。ルームで待機中...');
+    showDisconnectWinAndReturn();
 };
 
 window.onLobbyWaiting = (message) => {
@@ -733,6 +733,10 @@ function resetToLobby() {
         clearInterval(countdownTimer);
         countdownTimer = null;
     }
+    if (disconnectReturnTimer) {
+        clearTimeout(disconnectReturnTimer);
+        disconnectReturnTimer = null;
+    }
     clearItemEffectVisuals();
     resetItemInventory();
     board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
@@ -753,6 +757,26 @@ function resetToLobby() {
     countdownScreenEl().classList.add('hidden');
     document.getElementById('gameOverScreen').classList.add('hidden');
     document.getElementById('pauseScreen').classList.add('hidden');
+}
+
+function showDisconnectWinAndReturn() {
+    if (disconnectReturnTimer) {
+        clearTimeout(disconnectReturnTimer);
+        disconnectReturnTimer = null;
+    }
+
+    hasActiveRound = false;
+    waitingForOpponent = true;
+    isPaused = true;
+    gameAudio.stopBGM();
+    setPauseMessage('相手の接続が切れました。あなたの勝ちです！');
+    document.getElementById('pauseScreen').classList.remove('hidden');
+
+    disconnectReturnTimer = setTimeout(() => {
+        disconnectReturnTimer = null;
+        resetToLobby();
+        setLobbyState('相手が退出しました。ルームで待機中...');
+    }, 2300);
 }
 
 function setLobbyState(message) {
