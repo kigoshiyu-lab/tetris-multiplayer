@@ -219,13 +219,25 @@ class ChiptuneAudio {
     }
 
     initFileBgm() {
-        this.lobbyBgm = new Audio('BGM/lobby.mp3');
-        this.gameplayBgm = new Audio('BGM/gameplay.mp3');
+        this.lobbyBgm = this.createBgmAudio('BGM/lobby.mp3', 'lobby.mp3');
+        this.gameplayBgm = this.createBgmAudio('BGM/gameplay.mp3', 'gameplay.mp3');
         [this.lobbyBgm, this.gameplayBgm].forEach((bgm) => {
             bgm.loop = true;
             bgm.preload = 'auto';
             bgm.volume = 0.45;
         });
+    }
+
+    createBgmAudio(primarySrc, fallbackSrc) {
+        const audio = new Audio(primarySrc);
+        let switched = false;
+        audio.addEventListener('error', () => {
+            if (switched) return;
+            switched = true;
+            audio.src = fallbackSrc;
+            audio.load();
+        });
+        return audio;
     }
 
     playFileBgm(type) {
