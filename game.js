@@ -73,6 +73,38 @@ const countdownScreenEl = () => document.getElementById('countdownScreen');
 const countdownTextEl = () => document.getElementById('countdownText');
 const fogTopEl = () => document.getElementById('fogTop');
 const fogBottomEl = () => document.getElementById('fogBottom');
+const helpPreviewCanvasEl = () => document.getElementById('itemPreviewCanvas');
+
+const HELP_ITEM_PREVIEWS = {
+    fog_top: {
+        title: '🌫 霧・上',
+        description: '上側に霧が発生し、相手の上3段が見えにくくなります。'
+    },
+    fog_bottom: {
+        title: '🌫 霧・下',
+        description: '下側に霧が発生し、相手の下3段が見えにくくなります。'
+    },
+    control_swap: {
+        title: '🔀 混乱',
+        description: '左右移動と回転方向が逆になります（入力方向が反転）。'
+    },
+    hide_stack: {
+        title: '🌑 暗闇',
+        description: '積みブロックが暗くなり、盤面の視認性が大きく下がります。'
+    },
+    shuffle_stack: {
+        title: '🎲 撹乱',
+        description: '積みブロックの色がランダムに入れ替わります。'
+    },
+    clear_bottom: {
+        title: '⬆ 最下段解除',
+        description: '自分の最下段1列を消し、立て直しに使えます。'
+    }
+};
+
+let helpPreviewAnimationId = null;
+let helpPreviewStartedAt = 0;
+let helpPreviewItem = null;
 
 function isControlSwapActive() {
     return Date.now() < effectControlSwapUntil;
@@ -265,7 +297,160 @@ function setupHelpModal() {
     const openBtn = document.getElementById('openHelpBtn');
     const closeBtn = document.getElementById('closeHelpBtn');
     const backdrop = modal && modal.querySelector('.help-modal-backdrop');
+    const itemPreviewPopup = document.getElementById('itemPreviewPopup');
+    const itemPreviewTitle = document.getElementById('itemPreviewTitle');
+    const itemPreviewDescription = document.getElementById('itemPreviewDescription');
+    const closePreviewBtn = document.getElementById('closeItemPreviewBtn');
+    const itemTriggers = modal ? modal.querySelectorAll('.help-item-trigger') : [];
     if (!modal || !openBtn || !closeBtn) return;
+
+    function stopItemPreviewLoop() {
+        if (helpPreviewAnimationId) {
+            cancelAnimationFrame(helpPreviewAnimationId);
+            helpPreviewAnimationId = null;
+        }
+    }
+
+    function drawMiniBlock(context, x, y, size, color, alpha = 1) {
+        context.save();
+        context.globalAlpha = alpha;
+        context.fillStyle = color;
+        context.fillRect(x, y, size, size);
+        context.fillStyle = 'rgba(255,255,255,0.35)';
+        context.fillRect(x, y, size, 2);
+        context.fillRect(x, y, 2, size);
+        context.fillStyle = 'rgba(0,0,0,0.35)';
+        context.fillRect(x, y + size - 2, size, 2);
+        context.fillRect(x + size - 2, y, 2, size);
+        context.restore();
+    }
+
+    function drawPreviewFrame(itemType, elapsedMs) {
+        const previewCanvas = helpPreviewCanvasEl();
+        if (!previewCanvas) return;
+        const pctx = previewCanvas.getContext('2d');
+        if (!pctx) return;
+
+        const w = previewCanvas.width;
+        const h = previewCanvas.height;
+        const block = 12;
+        const boardX = 18;
+        const boardY = 12;
+        const boardCols = 10;
+        const boardRows = 10;
+        const t = elapsedMs / 1000;
+
+        pctx.clearRect(0, 0, w, h);
+        pctx.fillStyle = '#050505';
+        pctx.fillRect(0, 0, w, h);
+
+        pctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        for (let r = 0; r <= boardRows; r++) {
+            pctx.beginPath();
+            pctx.moveTo(boardX, boardY + r * block);
+            pctx.lineTo(boardX + boardCols * block, boardY + r * block);
+            pctx.stroke();
+        }
+        for (let c = 0; c <= boardCols; c++) {
+            pctx.beginPath();
+            pctx.moveTo(boardX + c * block, boardY);
+            pctx.lineTo(boardX + c * block, boardY + boardRows * block);
+            pctx.stroke();
+        }
+
+        const colors = ['#f8b800', '#0058f8', '#f878f8', '#00a800', '#e41212', '#f85800'];
+        for (let r = 5; r < boardRows; r++) {
+            for (let c = 0; c < boardCols; c++) {
+                let colorIdx = (r + c) % colors.length;
+                if (itemType === 'shuffle_stack') {
+                    colorIdx = Math.floor((r * 7 + c * 3 + Math.floor(t * 8)) % colors.length);
+                }
+                const isBottomRow = r === boardRows - 1;
+                const hideBottom = itemType === 'clear_bottom' && ((t * 2) % 2 > 1);
+                if (isBottomRow && hideBottom) continue;
+                const alpha = itemType === 'hide_stack' ? 0.18 : 0.95;
+                drawMiniBlock(
+                    pctx,
+                    boardX + c * block + 1,
+                    boardY + r * block + 1,
+                    block - 2,
+                    colors[colorIdx],
+                    alpha
+                );
+            }
+        }
+
+        const activeX = boardX + ((Math.floor(t * 3) % 4) + 3) * block;
+        const activeY = boardY + ((Math.floor(t * 5) % 3) + 2) * block;
+        drawMiniBlock(pctx, activeX + 1, activeY + 1, block - 2, '#b5f5fd', 1);
+        drawMiniBlock(pctx, activeX + block + 1, activeY + 1, block - 2, '#b5f5fd', 1);
+        drawMiniBlock(pctx, activeX + 2 * block + 1, activeY + 1, block - 2, '#b5f5fd', 1);
+
+        if (itemType === 'fog_top' || itemType === 'fog_bottom') {
+            const fogHeight = Math.floor((boardRows * block) * 0.35);
+            const fogY = itemType === 'fog_top'
+                ? boardY
+                : boardY + boardRows * block - fogHeight;
+            pctx.fillStyle = `rgba(0,0,0,${0.65 + Math.sin(t * 5) * 0.12})`;
+            pctx.fillRect(boardX, fogY, boardCols * block, fogHeight);
+        }
+
+        if (itemType === 'control_swap') {
+            const flip = Math.floor(t * 2) % 2 === 0;
+            pctx.fillStyle = '#f8b800';
+            pctx.font = "14px 'Press Start 2P'";
+            pctx.fillText(flip ? 'LEFT -> RIGHT' : 'RIGHT -> LEFT', 150, 46);
+            pctx.fillStyle = '#f878f8';
+            pctx.fillText(flip ? 'ROTATE CW -> CCW' : 'ROTATE CCW -> CW', 150, 74);
+        }
+
+        if (itemType === 'hide_stack') {
+            pctx.fillStyle = 'rgba(255,255,255,0.85)';
+            pctx.font = "12px 'Press Start 2P'";
+            pctx.fillText('stack hidden', 150, 56);
+        }
+
+        if (itemType === 'shuffle_stack') {
+            pctx.fillStyle = '#f8b800';
+            pctx.font = "12px 'Press Start 2P'";
+            pctx.fillText('color shuffle', 150, 56);
+        }
+
+        if (itemType === 'clear_bottom') {
+            pctx.fillStyle = '#00a800';
+            pctx.font = "12px 'Press Start 2P'";
+            pctx.fillText('bottom row clear', 150, 56);
+        }
+    }
+
+    function startItemPreview(itemType) {
+        const preview = HELP_ITEM_PREVIEWS[itemType];
+        if (!preview || !itemPreviewPopup || !itemPreviewTitle || !itemPreviewDescription) return;
+
+        helpPreviewItem = itemType;
+        helpPreviewStartedAt = performance.now();
+        itemPreviewTitle.textContent = `${preview.title} の実演`;
+        itemPreviewDescription.textContent = preview.description;
+        itemPreviewPopup.classList.remove('hidden');
+        itemPreviewPopup.setAttribute('aria-hidden', 'false');
+
+        stopItemPreviewLoop();
+        const loop = (now) => {
+            if (!helpPreviewItem) return;
+            drawPreviewFrame(helpPreviewItem, now - helpPreviewStartedAt);
+            helpPreviewAnimationId = requestAnimationFrame(loop);
+        };
+        helpPreviewAnimationId = requestAnimationFrame(loop);
+    }
+
+    function closeItemPreview() {
+        helpPreviewItem = null;
+        stopItemPreviewLoop();
+        if (itemPreviewPopup) {
+            itemPreviewPopup.classList.add('hidden');
+            itemPreviewPopup.setAttribute('aria-hidden', 'true');
+        }
+    }
 
     function openModal() {
         modal.classList.remove('hidden');
@@ -273,6 +458,7 @@ function setupHelpModal() {
     }
 
     function closeModal() {
+        closeItemPreview();
         modal.classList.add('hidden');
         modal.setAttribute('aria-hidden', 'true');
     }
@@ -282,6 +468,15 @@ function setupHelpModal() {
     if (backdrop) {
         backdrop.addEventListener('click', closeModal);
     }
+    if (closePreviewBtn) {
+        closePreviewBtn.addEventListener('click', closeItemPreview);
+    }
+    itemTriggers.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const itemType = btn.getAttribute('data-preview-item');
+            if (itemType) startItemPreview(itemType);
+        });
+    });
 }
 
 function setupItemControls() {
@@ -721,11 +916,9 @@ function drawBlock(context, x, y, color) {
 }
 
 function drawHiddenStackBlock(x, y) {
-    ctx.fillStyle = '#0a0a0a';
+    // Complete blackout: stacked blocks should be fully invisible during darkness.
+    ctx.fillStyle = '#000';
     ctx.fillRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
 }
 
 function drawBlockAtSize(context, x, y, color, size) {

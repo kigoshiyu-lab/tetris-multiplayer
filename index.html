@@ -23,13 +23,13 @@
 
         <section class="multiplayer-panel" id="lobbyPanel">
             <h2>対戦モード（試験版）</h2>
+            <p class="multiplayer-note">サーバー接続は自動です。ルームIDだけ入力してください。</p>
             <div class="multiplayer-controls">
                 <input id="roomInput" type="text" maxlength="12" placeholder="ROOM123" />
                 <button id="joinRoomBtn">ルーム参加</button>
                 <button id="startGameBtn">ゲームを開始します</button>
                 <button id="leaveRoomBtn">切断</button>
             </div>
-            <p class="multiplayer-note">サーバー接続は自動です。ルームIDだけ入力してください。</p>
             <p id="multiplayerStatus">未接続</p>
             <p id="lobbyHint" class="lobby-hint">ルーム参加して対戦準備を開始してください。</p>
             <button type="button" id="openHelpBtn" class="help-open-btn">説明書（ルール・アイテム）</button>
@@ -41,6 +41,7 @@
             <div class="help-modal-content" role="dialog" aria-labelledby="helpModalTitle">
                 <button type="button" id="closeHelpBtn" class="help-close-btn" aria-label="閉じる">×</button>
                 <h2 id="helpModalTitle" class="help-modal-title">対戦ルール・アイテム</h2>
+                <p class="help-preview-guide">※ アイテム名をタップ（クリック）すると、下に効果の実演ポップアップが表示されます。</p>
                 <div class="help-body">
                     <section>
                         <h3>基本</h3>
@@ -49,77 +50,90 @@
                     <section>
                         <h3>相手攻撃（同時消去で取得）</h3>
                         <ul>
-                            <li><strong>2列同時</strong> … 霧・上：相手の上3段を5秒間見えにくくする</li>
-                            <li><strong>2列同時</strong> … 霧・下：相手の下3段を5秒間見えにくくする</li>
-                            <li><strong>3列同時</strong> … 混乱：相手に10秒間、左右移動と回転が逆になる</li>
-                            <li><strong>3列同時</strong> … 暗闇：相手に10秒間、積みブロックがほぼ見えなくなる（操作中ミノは見える）</li>
-                            <li><strong>4列同時</strong> … 撹乱：相手の積みブロックの色をランダムに入れ替える</li>
+                            <li><button type="button" class="help-item-trigger" data-preview-item="fog_top">🌫 霧・上（2列同時）</button>：相手の上3段を5秒間完全に見えなくする</li>
+                            <li><button type="button" class="help-item-trigger" data-preview-item="fog_bottom">🌫 霧・下（2列同時）</button>：相手の下3段を5秒間完全に見えなくする</li>
+                            <li><button type="button" class="help-item-trigger" data-preview-item="control_swap">🔀 混乱（3列同時）</button>：相手に10秒間、左右移動と回転が逆になる</li>
+                            <li><button type="button" class="help-item-trigger" data-preview-item="hide_stack">🌑 暗闇（3列同時）</button>：相手に10秒間、積みブロックが完全に見えなくなる（操作中ミノは見える）</li>
+                            <li><button type="button" class="help-item-trigger" data-preview-item="shuffle_stack">🎲 撹乱（4列同時）</button>：相手の積みブロックの色をランダムに入れ替える</li>
                         </ul>
                     </section>
                     <section>
                         <h3>自分お助け（同時消去で取得）</h3>
                         <ul>
-                            <li><strong>3列同時</strong> … 最下段解除：いちばん下の1行を消す（自分のみ）</li>
+                            <li><button type="button" class="help-item-trigger" data-preview-item="clear_bottom">⬆ 最下段解除（3列同時）</button>：いちばん下の1行を消す（自分のみ）</li>
                         </ul>
                     </section>
+                </div>
+                <div id="itemPreviewPopup" class="item-preview-popup hidden" aria-hidden="true">
+                    <button type="button" id="closeItemPreviewBtn" class="item-preview-close-btn" aria-label="プレビューを閉じる">×</button>
+                    <div id="itemPreviewTitle" class="item-preview-title">アイテム実演</div>
+                    <canvas id="itemPreviewCanvas" width="240" height="144"></canvas>
+                    <p id="itemPreviewDescription" class="item-preview-description">説明書のアイテム名をクリックすると、効果の動きを表示します。</p>
                 </div>
             </div>
         </div>
 
         <div class="game-container hidden" id="gameContainer">
             <!-- Left Panel: Next Piece -->
-            <div class="side-panel">
+            <div class="side-panel side-panel-left">
                 <div class="panel-card">
                     <div class="next-preview-left">
-                        <h2>次のピース</h2>
+                        <h2 class="next-piece-title">次のピース</h2>
                         <canvas id="nextCanvas" width="64" height="64"></canvas>
                     </div>
                     <div class="item-inline-wrap">
                         <div class="item-inline-title">アイテム</div>
                         <div class="item-inline-grid" id="itemGrid">
                             <button type="button" class="item-btn" data-item="fog_top" title="霧・上">
-                                <span class="item-icon">🌫</span><span class="item-count" data-count="fog_top">0</span>
+                                <span class="item-icon">🌫</span>
+                                <span class="item-meta">
+                                    <span class="item-name">上霧</span>
+                                    <span class="item-effect">相手の上3段を5秒間ブラックアウト</span>
+                                </span>
+                                <span class="item-count" data-count="fog_top">0</span>
                             </button>
                             <button type="button" class="item-btn" data-item="fog_bottom" title="霧・下">
-                                <span class="item-icon">🌫</span><span class="item-count" data-count="fog_bottom">0</span>
+                                <span class="item-icon">🌫</span>
+                                <span class="item-meta">
+                                    <span class="item-name">下霧</span>
+                                    <span class="item-effect">相手の下3段を5秒間ブラックアウト</span>
+                                </span>
+                                <span class="item-count" data-count="fog_bottom">0</span>
                             </button>
                             <button type="button" class="item-btn" data-item="control_swap" title="操作混乱">
-                                <span class="item-icon">🔀</span><span class="item-count" data-count="control_swap">0</span>
+                                <span class="item-icon">🔀</span>
+                                <span class="item-meta">
+                                    <span class="item-name">混乱</span>
+                                    <span class="item-effect">10秒間 左右移動・回転方向が逆</span>
+                                </span>
+                                <span class="item-count" data-count="control_swap">0</span>
                             </button>
                             <button type="button" class="item-btn" data-item="hide_stack" title="暗闇">
-                                <span class="item-icon">🌑</span><span class="item-count" data-count="hide_stack">0</span>
+                                <span class="item-icon">🌑</span>
+                                <span class="item-meta">
+                                    <span class="item-name">暗闇</span>
+                                    <span class="item-effect">10秒間 積みブロックを不可視化</span>
+                                </span>
+                                <span class="item-count" data-count="hide_stack">0</span>
                             </button>
                             <button type="button" class="item-btn" data-item="shuffle_stack" title="撹乱">
-                                <span class="item-icon">🎲</span><span class="item-count" data-count="shuffle_stack">0</span>
+                                <span class="item-icon">🎲</span>
+                                <span class="item-meta">
+                                    <span class="item-name">撹乱</span>
+                                    <span class="item-effect">相手の積みブロック色をランダム化</span>
+                                </span>
+                                <span class="item-count" data-count="shuffle_stack">0</span>
                             </button>
                             <button type="button" class="item-btn item-btn-help" data-item="clear_bottom" title="最下段解除">
-                                <span class="item-icon">⬆</span><span class="item-count" data-count="clear_bottom">0</span>
+                                <span class="item-icon">⬆</span>
+                                <span class="item-meta">
+                                    <span class="item-name">最下段解除</span>
+                                    <span class="item-effect">自分の最下段を1行消去</span>
+                                </span>
+                                <span class="item-count" data-count="clear_bottom">0</span>
                             </button>
                         </div>
                         <div id="itemGetToast" class="item-get-toast hidden">get!</div>
-                    </div>
-                </div>
-                <div class="panel-card controls-info">
-                    <h2>操作方法</h2>
-                    <div class="control-item">
-                        <span class="key">←→</span>
-                        <span>移動</span>
-                    </div>
-                    <div class="control-item">
-                        <span class="key">↑</span>
-                        <span>回転</span>
-                    </div>
-                    <div class="control-item">
-                        <span class="key">↓</span>
-                        <span>高速落下</span>
-                    </div>
-                    <div class="control-item">
-                        <span class="key">SPACE</span>
-                        <span>即座に落下</span>
-                    </div>
-                    <div class="control-item">
-                        <span class="key">P</span>
-                        <span>一時停止</span>
                     </div>
                 </div>
             </div>
@@ -194,6 +208,29 @@
 
             <!-- Right Panel: Score & Level -->
             <div class="side-panel side-panel-right">
+                <div class="panel-card controls-info">
+                    <h2>操作方法</h2>
+                    <div class="control-item">
+                        <span class="key">←→</span>
+                        <span>移動</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="key">↑</span>
+                        <span>回転</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="key">↓</span>
+                        <span>高速落下</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="key">SPACE</span>
+                        <span>即座に落下</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="key">P</span>
+                        <span>一時停止</span>
+                    </div>
+                </div>
                 <div class="panel-card">
                     <h2>スコア</h2>
                     <div class="score-display" id="score">0</div>
