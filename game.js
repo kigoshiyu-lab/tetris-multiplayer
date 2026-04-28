@@ -822,9 +822,7 @@ function togglePause() {
 
 // ===== Update Game State =====
 function update(time = 0) {
-    if (!gameOver) {
-        requestAnimationFrame(update);
-    }
+    requestAnimationFrame(update);
 
     draw();
 
