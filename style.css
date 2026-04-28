@@ -136,6 +136,88 @@ header {
     color: var(--nes-white);
 }
 
+.help-open-btn {
+    margin-top: 0.75rem;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.45rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--nes-green);
+    color: #000;
+    border: 2px solid #000;
+    cursor: pointer;
+    width: 100%;
+}
+
+.help-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.help-modal.hidden {
+    display: none;
+}
+
+.help-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+}
+
+.help-modal-content {
+    position: relative;
+    z-index: 1;
+    max-width: 520px;
+    max-height: 85vh;
+    overflow: auto;
+    background: #111;
+    border: 4px solid var(--nes-white);
+    padding: 1rem 1.25rem;
+    color: var(--nes-white);
+    font-size: 0.45rem;
+    line-height: 1.6;
+}
+
+.help-modal-title {
+    font-size: 0.65rem;
+    color: var(--nes-yellow);
+    margin-bottom: 0.75rem;
+}
+
+.help-body h3 {
+    font-size: 0.5rem;
+    color: var(--nes-blue);
+    margin: 0.75rem 0 0.35rem;
+}
+
+.help-body ul {
+    padding-left: 1rem;
+    margin: 0.25rem 0 0.5rem;
+    color: var(--nes-gray);
+}
+
+.help-body li {
+    margin-bottom: 0.35rem;
+}
+
+.help-close-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
+    line-height: 1;
+    background: #333;
+    color: #fff;
+    border: 2px solid #000;
+    cursor: pointer;
+}
+
 .mute-btn {
     background: var(--nes-gray);
     border: 4px solid #000;
@@ -224,6 +306,31 @@ header {
 .game-board-container {
     position: relative;
     border: 8px solid var(--nes-gray);
+}
+
+.fog-layer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 4;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        90deg,
+        rgba(200, 200, 200, 0.35) 0 4px,
+        rgba(100, 100, 100, 0.25) 4px 8px
+    );
+    opacity: 0.9;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+}
+
+.fog-top {
+    top: 0;
+    height: 15%;
+}
+
+.fog-bottom {
+    bottom: 0;
+    height: 15%;
 }
 
 .mobile-play-area {
@@ -410,6 +517,69 @@ header {
     .controls-info {
         display: none;
     }
+}
+
+/* Items (right column) */
+.item-panel-hint {
+    font-size: 0.35rem;
+    color: var(--nes-gray);
+    margin-bottom: 0.4rem;
+}
+
+.item-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.35rem;
+}
+
+.item-btn {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    padding: 0.35rem 0.2rem;
+    min-height: 3.2rem;
+    background: #222;
+    border: 2px solid var(--nes-gray);
+    color: #fff;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.3rem;
+    cursor: pointer;
+    line-height: 1.2;
+}
+
+.item-btn:disabled,
+.item-btn.item-disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.item-icon {
+    font-size: 0.7rem;
+    line-height: 1;
+}
+
+.item-name {
+    font-size: 0.28rem;
+    color: var(--nes-yellow);
+}
+
+.item-count {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    min-width: 1rem;
+    padding: 0.1rem 0.2rem;
+    background: #000;
+    border: 1px solid #fff;
+    font-size: 0.32rem;
+    color: #fff;
+}
+
+.item-btn-help {
+    border-color: var(--nes-green);
 }
 
 @media (max-width: 640px) {

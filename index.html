@@ -32,7 +32,38 @@
             <p class="multiplayer-note">サーバー接続は自動です。ルームIDだけ入力してください。</p>
             <p id="multiplayerStatus">未接続</p>
             <p id="lobbyHint" class="lobby-hint">ルーム参加して対戦準備を開始してください。</p>
+            <button type="button" id="openHelpBtn" class="help-open-btn">説明書（ルール・アイテム）</button>
         </section>
+
+        <div id="helpModal" class="help-modal hidden" aria-hidden="true">
+            <div class="help-modal-backdrop"></div>
+            <div class="help-modal-content" role="dialog" aria-labelledby="helpModalTitle">
+                <button type="button" id="closeHelpBtn" class="help-close-btn" aria-label="閉じる">×</button>
+                <h2 id="helpModalTitle" class="help-modal-title">対戦ルール・アイテム</h2>
+                <div class="help-body">
+                    <section>
+                        <h3>基本</h3>
+                        <p>ルームIDで参加し、両者が「ゲームを開始します」を押すとカウントダウン後に対戦が始まります。ラインを一度に複数消すとアイテムが手に入ります（右側のスロットにストック）。タップで使用します。</p>
+                    </section>
+                    <section>
+                        <h3>相手攻撃（同時消去で取得）</h3>
+                        <ul>
+                            <li><strong>2列同時</strong> … 霧・上：相手の上3段を5秒間見えにくくする</li>
+                            <li><strong>2列同時</strong> … 霧・下：相手の下3段を5秒間見えにくくする</li>
+                            <li><strong>3列同時</strong> … 混乱：相手に10秒間、左右移動と回転が逆になる</li>
+                            <li><strong>3列同時</strong> … 暗闇：相手に10秒間、積みブロックがほぼ見えなくなる（操作中ミノは見える）</li>
+                            <li><strong>4列同時</strong> … 撹乱：相手の積みブロックの色をランダムに入れ替える</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h3>自分お助け（同時消去で取得）</h3>
+                        <ul>
+                            <li><strong>3列同時</strong> … 最下段解除：いちばん下の1行を消す（自分のみ）</li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+        </div>
 
         <div class="game-container hidden" id="gameContainer">
             <!-- Left Panel: Next Piece -->
@@ -94,6 +125,8 @@
                 </div>
 
                 <div class="game-board-container">
+                    <div id="fogTop" class="fog-layer fog-top hidden" aria-hidden="true"></div>
+                    <div id="fogBottom" class="fog-layer fog-bottom hidden" aria-hidden="true"></div>
                     <canvas id="gameCanvas" width="300" height="600"></canvas>
                     <div id="countdownScreen" class="countdown-screen hidden">
                         <div id="countdownText">3</div>
@@ -128,8 +161,38 @@
                 </div>
             </div>
 
-            <!-- Right Panel: Score & Level -->
-            <div class="side-panel">
+            <!-- Right Panel: Items + Score & Level -->
+            <div class="side-panel side-panel-right">
+                <div class="panel-card item-panel" id="itemPanel">
+                    <h2>アイテム</h2>
+                    <p class="item-panel-hint">タップで使用</p>
+                    <div class="item-grid" id="itemGrid">
+                        <button type="button" class="item-btn" data-item="fog_top" title="霧・上">
+                            <span class="item-icon">🌫</span><span class="item-name">上霧</span>
+                            <span class="item-count" data-count="fog_top">0</span>
+                        </button>
+                        <button type="button" class="item-btn" data-item="fog_bottom" title="霧・下">
+                            <span class="item-icon">🌫</span><span class="item-name">下霧</span>
+                            <span class="item-count" data-count="fog_bottom">0</span>
+                        </button>
+                        <button type="button" class="item-btn" data-item="control_swap" title="操作混乱">
+                            <span class="item-icon">🔀</span><span class="item-name">混乱</span>
+                            <span class="item-count" data-count="control_swap">0</span>
+                        </button>
+                        <button type="button" class="item-btn" data-item="hide_stack" title="暗闇">
+                            <span class="item-icon">🌑</span><span class="item-name">暗闇</span>
+                            <span class="item-count" data-count="hide_stack">0</span>
+                        </button>
+                        <button type="button" class="item-btn" data-item="shuffle_stack" title="撹乱">
+                            <span class="item-icon">🎲</span><span class="item-name">撹乱</span>
+                            <span class="item-count" data-count="shuffle_stack">0</span>
+                        </button>
+                        <button type="button" class="item-btn item-btn-help" data-item="clear_bottom" title="最下段解除">
+                            <span class="item-icon">⬆</span><span class="item-name">助っ人</span>
+                            <span class="item-count" data-count="clear_bottom">0</span>
+                        </button>
+                    </div>
+                </div>
                 <div class="panel-card">
                     <h2>スコア</h2>
                     <div class="score-display" id="score">0</div>

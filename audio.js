@@ -1,3 +1,179 @@
+/**
+ * 8-bit風ループBGM（ラウンド開始時にランダムで1曲）
+ * クラシック群は短いアレンジ。テトリスはコロベイニキ（従来実装と同一データ）。
+ */
+const BGM_CLASSICAL_TRACKS = [
+    {
+        name: 'Beethoven Sym.5',
+        melody: [
+            { note: 392, duration: 0.18 }, { note: 392, duration: 0.18 }, { note: 392, duration: 0.18 },
+            { note: 311.13, duration: 0.55 },
+            { note: 349.23, duration: 0.18 }, { note: 349.23, duration: 0.18 }, { note: 349.23, duration: 0.18 },
+            { note: 293.66, duration: 0.55 },
+            { note: 311.13, duration: 0.18 }, { note: 311.13, duration: 0.18 }, { note: 311.13, duration: 0.18 },
+            { note: 261.63, duration: 0.55 },
+            { note: 246.94, duration: 0.35 }, { note: 246.94, duration: 0.35 }, { note: 246.94, duration: 0.35 },
+            { note: 246.94, duration: 0.45 }, { note: 0, duration: 0.25 }
+        ],
+        bass: [
+            { note: 98, duration: 0.35 }, { note: 0, duration: 0.35 },
+            { note: 87.31, duration: 0.35 }, { note: 0, duration: 0.35 }
+        ]
+    },
+    {
+        name: 'Mozart Eine kleine',
+        melody: [
+            { note: 392, duration: 0.22 }, { note: 293.66, duration: 0.22 }, { note: 392, duration: 0.22 },
+            { note: 493.88, duration: 0.22 }, { note: 587.33, duration: 0.35 }, { note: 783.99, duration: 0.35 },
+            { note: 587.33, duration: 0.22 }, { note: 493.88, duration: 0.22 }, { note: 392, duration: 0.45 },
+            { note: 293.66, duration: 0.22 }, { note: 392, duration: 0.22 }, { note: 493.88, duration: 0.22 },
+            { note: 587.33, duration: 0.35 }, { note: 659.25, duration: 0.45 }, { note: 587.33, duration: 0.35 },
+            { note: 523.25, duration: 0.5 }, { note: 0, duration: 0.2 }
+        ],
+        bass: [
+            { note: 196, duration: 0.45 }, { note: 146.83, duration: 0.45 },
+            { note: 174.61, duration: 0.45 }, { note: 196, duration: 0.45 }
+        ]
+    },
+    {
+        name: 'Vivaldi Spring',
+        melody: [
+            { note: 659.25, duration: 0.2 }, { note: 659.25, duration: 0.2 }, { note: 659.25, duration: 0.2 },
+            { note: 493.88, duration: 0.2 }, { note: 523.25, duration: 0.2 }, { note: 587.33, duration: 0.2 },
+            { note: 659.25, duration: 0.35 }, { note: 783.99, duration: 0.35 }, { note: 698.46, duration: 0.2 },
+            { note: 659.25, duration: 0.2 }, { note: 587.33, duration: 0.2 }, { note: 523.25, duration: 0.35 },
+            { note: 329.63, duration: 0.25 }, { note: 329.63, duration: 0.25 }, { note: 293.66, duration: 0.25 },
+            { note: 261.63, duration: 0.45 }, { note: 0, duration: 0.2 }
+        ],
+        bass: [
+            { note: 164.81, duration: 0.4 }, { note: 196, duration: 0.4 },
+            { note: 220, duration: 0.4 }, { note: 196, duration: 0.4 }
+        ]
+    },
+    {
+        name: 'Bizet Carmen',
+        melody: [
+            { note: 293.66, duration: 0.25 }, { note: 293.66, duration: 0.25 }, { note: 293.66, duration: 0.25 },
+            { note: 293.66, duration: 0.35 },
+            { note: 220, duration: 0.25 }, { note: 220, duration: 0.25 }, { note: 220, duration: 0.25 },
+            { note: 220, duration: 0.35 },
+            { note: 293.66, duration: 0.25 }, { note: 293.66, duration: 0.25 }, { note: 293.66, duration: 0.25 },
+            { note: 293.66, duration: 0.35 },
+            { note: 246.94, duration: 0.3 }, { note: 261.63, duration: 0.3 }, { note: 293.66, duration: 0.45 },
+            { note: 220, duration: 0.5 }, { note: 0, duration: 0.2 }
+        ],
+        bass: [
+            { note: 146.83, duration: 0.5 }, { note: 110, duration: 0.5 },
+            { note: 123.47, duration: 0.5 }, { note: 110, duration: 0.5 }
+        ]
+    },
+    {
+        name: 'Wagner Walkure',
+        melody: [
+            { note: 164.81, duration: 0.16 }, { note: 196, duration: 0.16 }, { note: 246.94, duration: 0.16 },
+            { note: 329.63, duration: 0.45 },
+            { note: 196, duration: 0.16 }, { note: 246.94, duration: 0.16 }, { note: 311.13, duration: 0.16 },
+            { note: 392, duration: 0.45 },
+            { note: 220, duration: 0.16 }, { note: 261.63, duration: 0.16 }, { note: 329.63, duration: 0.16 },
+            { note: 440, duration: 0.45 },
+            { note: 246.94, duration: 0.16 }, { note: 293.66, duration: 0.16 }, { note: 349.23, duration: 0.16 },
+            { note: 493.88, duration: 0.55 }, { note: 392, duration: 0.4 }, { note: 0, duration: 0.2 }
+        ],
+        bass: [
+            { note: 82.41, duration: 0.32 }, { note: 98, duration: 0.32 },
+            { note: 110, duration: 0.32 }, { note: 98, duration: 0.32 }
+        ]
+    },
+    {
+        name: 'Rossini William Tell',
+        melody: [
+            { note: 523.25, duration: 0.1 }, { note: 587.33, duration: 0.1 }, { note: 659.25, duration: 0.1 },
+            { note: 698.46, duration: 0.1 }, { note: 783.99, duration: 0.1 }, { note: 880, duration: 0.1 },
+            { note: 987.77, duration: 0.12 }, { note: 1046.5, duration: 0.15 },
+            { note: 1046.5, duration: 0.12 }, { note: 987.77, duration: 0.1 }, { note: 880, duration: 0.1 },
+            { note: 783.99, duration: 0.1 }, { note: 698.46, duration: 0.1 }, { note: 659.25, duration: 0.1 },
+            { note: 587.33, duration: 0.1 }, { note: 523.25, duration: 0.35 },
+            { note: 659.25, duration: 0.2 }, { note: 523.25, duration: 0.45 }, { note: 0, duration: 0.2 }
+        ],
+        bass: [
+            { note: 130.81, duration: 0.2 }, { note: 146.83, duration: 0.2 },
+            { note: 164.81, duration: 0.2 }, { note: 174.61, duration: 0.2 }
+        ]
+    },
+    {
+        name: 'Tchaikovsky Nutcracker',
+        melody: [
+            { note: 392, duration: 0.22 }, { note: 392, duration: 0.22 }, { note: 392, duration: 0.22 },
+            { note: 392, duration: 0.22 }, { note: 440, duration: 0.22 }, { note: 493.88, duration: 0.22 },
+            { note: 523.25, duration: 0.4 }, { note: 587.33, duration: 0.4 }, { note: 523.25, duration: 0.22 },
+            { note: 493.88, duration: 0.22 }, { note: 440, duration: 0.22 }, { note: 392, duration: 0.45 },
+            { note: 349.23, duration: 0.22 }, { note: 392, duration: 0.22 }, { note: 440, duration: 0.22 },
+            { note: 493.88, duration: 0.45 }, { note: 523.25, duration: 0.5 }, { note: 392, duration: 0.45 },
+            { note: 0, duration: 0.2 }
+        ],
+        bass: [
+            { note: 196, duration: 0.45 }, { note: 174.61, duration: 0.45 },
+            { note: 196, duration: 0.45 }, { note: 174.61, duration: 0.45 }
+        ]
+    },
+    {
+        name: 'Tetris Korobeiniki',
+        melody: [
+            { note: 659.25, duration: 0.4 },
+            { note: 493.88, duration: 0.2 },
+            { note: 523.25, duration: 0.2 },
+            { note: 587.33, duration: 0.4 },
+            { note: 523.25, duration: 0.2 },
+            { note: 493.88, duration: 0.2 },
+            { note: 440.0, duration: 0.4 },
+            { note: 440.0, duration: 0.2 },
+            { note: 523.25, duration: 0.2 },
+            { note: 659.25, duration: 0.4 },
+            { note: 587.33, duration: 0.2 },
+            { note: 523.25, duration: 0.2 },
+            { note: 493.88, duration: 0.6 },
+            { note: 523.25, duration: 0.2 },
+            { note: 587.33, duration: 0.4 },
+            { note: 659.25, duration: 0.4 },
+            { note: 523.25, duration: 0.4 },
+            { note: 440.0, duration: 0.4 },
+            { note: 440.0, duration: 0.4 },
+            { note: 0, duration: 0.2 },
+            { note: 587.33, duration: 0.4 },
+            { note: 698.46, duration: 0.2 },
+            { note: 880.0, duration: 0.4 },
+            { note: 783.99, duration: 0.2 },
+            { note: 698.46, duration: 0.2 },
+            { note: 659.25, duration: 0.6 },
+            { note: 523.25, duration: 0.2 },
+            { note: 659.25, duration: 0.4 },
+            { note: 587.33, duration: 0.2 },
+            { note: 523.25, duration: 0.2 },
+            { note: 493.88, duration: 0.4 },
+            { note: 493.88, duration: 0.2 },
+            { note: 523.25, duration: 0.2 },
+            { note: 587.33, duration: 0.4 },
+            { note: 659.25, duration: 0.4 },
+            { note: 523.25, duration: 0.4 },
+            { note: 440.0, duration: 0.4 },
+            { note: 440.0, duration: 0.4 },
+            { note: 0, duration: 0.4 }
+        ],
+        bass: [
+            { note: 164.81, duration: 0.4 },
+            { note: 0, duration: 0.4 },
+            { note: 164.81, duration: 0.4 },
+            { note: 0, duration: 0.4 },
+            { note: 220.0, duration: 0.4 },
+            { note: 0, duration: 0.4 },
+            { note: 220.0, duration: 0.4 },
+            { note: 0, duration: 0.4 }
+        ]
+    }
+];
+
+/** 8曲: クラシック7 + テトリス（コロベイニキ） */
+
 // ===== 8-bit Audio System =====
 class ChiptuneAudio {
     constructor() {
@@ -124,11 +300,51 @@ class ChiptuneAudio {
         });
     }
 
-    // ===== BGM - Tetris Theme (8-bit style) =====
+    /** 3・2・1 表示用（0=3, 1=2, 2=1） 音程を少し上げて緊張感 */
+    playCountdownTick(step) {
+        if (this.isMuted) return;
+        const freqs = [392.0, 493.88, 587.33]; // G4, B4, D5
+        const freq = freqs[Math.min(Math.max(step, 0), 2)];
+        this.createOscillator(freq, 'square', 0.1, 0.28);
+    }
+
+    /** START 表示時の短いファンファーレ */
+    playCountdownStart() {
+        if (this.isMuted) return;
+        const freqs = [523.25, 659.25, 783.99, 1046.5]; // C5 E5 G5 C6
+        freqs.forEach((freq, i) => {
+            setTimeout(() => {
+                this.createOscillator(freq, 'square', 0.12, 0.3);
+            }, i * 70);
+        });
+    }
+
+    playItemUse() {
+        if (this.isMuted) return;
+        this.createOscillator(880, 'square', 0.08, 0.22);
+        setTimeout(() => {
+            if (!this.isMuted) this.createOscillator(1174.66, 'square', 0.1, 0.2);
+        }, 60);
+    }
+
+    // ===== BGM: random classical loop (8-bit) =====
+    /** 一時停止解除・初回など：今選ばれている曲のループ先頭から */
     startBGM() {
         if (this.isMuted || this.isPlaying) return;
         this.isPlaying = true;
-        this.playTetrisTheme();
+        if (this.activeBgmTrack === undefined || this.activeBgmTrack === null) {
+            this.activeBgmTrack = Math.floor(Math.random() * BGM_CLASSICAL_TRACKS.length);
+        }
+        this.playActiveBgmTrack();
+    }
+
+    /** 対戦ラウンド開始時：毎回ランダムに1曲選ぶ */
+    startBGMNewRound() {
+        this.stopBGM();
+        this.activeBgmTrack = Math.floor(Math.random() * BGM_CLASSICAL_TRACKS.length);
+        if (this.isMuted) return;
+        this.isPlaying = true;
+        this.playActiveBgmTrack();
     }
 
     stopBGM() {
@@ -143,132 +359,81 @@ class ChiptuneAudio {
         }
     }
 
-    playTetrisTheme() {
+    playActiveBgmTrack() {
         if (!this.isPlaying || this.isMuted) return;
-
-        // Tetris Theme A (Korobeiniki) - Simplified 8-bit version
-        const melody = [
-            { note: 659.25, duration: 0.4 },  // E5
-            { note: 493.88, duration: 0.2 },  // B4
-            { note: 523.25, duration: 0.2 },  // C5
-            { note: 587.33, duration: 0.4 },  // D5
-            { note: 523.25, duration: 0.2 },  // C5
-            { note: 493.88, duration: 0.2 },  // B4
-            { note: 440.00, duration: 0.4 },  // A4
-            { note: 440.00, duration: 0.2 },  // A4
-            { note: 523.25, duration: 0.2 },  // C5
-            { note: 659.25, duration: 0.4 },  // E5
-            { note: 587.33, duration: 0.2 },  // D5
-            { note: 523.25, duration: 0.2 },  // C5
-            { note: 493.88, duration: 0.6 },  // B4
-            { note: 523.25, duration: 0.2 },  // C5
-            { note: 587.33, duration: 0.4 },  // D5
-            { note: 659.25, duration: 0.4 },  // E5
-            { note: 523.25, duration: 0.4 },  // C5
-            { note: 440.00, duration: 0.4 },  // A4
-            { note: 440.00, duration: 0.4 },  // A4
-            { note: 0, duration: 0.2 },       // Rest
-
-            { note: 587.33, duration: 0.4 },  // D5
-            { note: 698.46, duration: 0.2 },  // F5
-            { note: 880.00, duration: 0.4 },  // A5
-            { note: 783.99, duration: 0.2 },  // G5
-            { note: 698.46, duration: 0.2 },  // F5
-            { note: 659.25, duration: 0.6 },  // E5
-            { note: 523.25, duration: 0.2 },  // C5
-            { note: 659.25, duration: 0.4 },  // E5
-            { note: 587.33, duration: 0.2 },  // D5
-            { note: 523.25, duration: 0.2 },  // C5
-            { note: 493.88, duration: 0.4 },  // B4
-            { note: 493.88, duration: 0.2 },  // B4
-            { note: 523.25, duration: 0.2 },  // C5
-            { note: 587.33, duration: 0.4 },  // D5
-            { note: 659.25, duration: 0.4 },  // E5
-            { note: 523.25, duration: 0.4 },  // C5
-            { note: 440.00, duration: 0.4 },  // A4
-            { note: 440.00, duration: 0.4 },  // A4
-            { note: 0, duration: 0.4 },       // Rest
-        ];
-
-        // Bass line (simplified)
-        const bass = [
-            { note: 164.81, duration: 0.4 },  // E3
-            { note: 0, duration: 0.4 },
-            { note: 164.81, duration: 0.4 },
-            { note: 0, duration: 0.4 },
-            { note: 220.00, duration: 0.4 },  // A3
-            { note: 0, duration: 0.4 },
-            { note: 220.00, duration: 0.4 },
-            { note: 0, duration: 0.4 },
-        ];
-
-        this.playMelodySequence(melody, bass);
+        const track = BGM_CLASSICAL_TRACKS[this.activeBgmTrack];
+        if (!track) {
+            this.activeBgmTrack = 0;
+            return this.playActiveBgmTrack();
+        }
+        this.playMelodySequence(
+            track.melody,
+            track.bass,
+            () => {
+                if (this.isPlaying) this.playActiveBgmTrack();
+            }
+        );
     }
 
-    playMelodySequence(melody, bass) {
+    playMelodySequence(melody, bass, onLoop) {
         if (!this.isPlaying || this.isMuted) return;
+        if (!this.audioContext) return;
 
-        let melodyTime = 0;
-        let bassTime = 0;
         const startTime = this.audioContext.currentTime;
+        let melodyTime = 0;
+        const totalMelodyTime = melody.reduce((s, n) => s + n.duration, 0);
 
-        // Play melody
-        melody.forEach((note, i) => {
+        melody.forEach((note) => {
             if (note.note > 0) {
                 const osc = this.audioContext.createOscillator();
                 const gainNode = this.audioContext.createGain();
-
                 osc.type = 'square';
                 osc.frequency.value = note.note;
-
                 const noteStart = startTime + melodyTime;
                 const noteEnd = noteStart + note.duration;
-
-                gainNode.gain.setValueAtTime(0.15, noteStart);
+                gainNode.gain.setValueAtTime(0.14, noteStart);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, noteEnd);
-
                 osc.connect(gainNode);
                 gainNode.connect(this.bgmGain);
-
                 osc.start(noteStart);
                 osc.stop(noteEnd);
             }
             melodyTime += note.duration;
         });
 
-        // Play bass
-        for (let i = 0; i < 10; i++) {
-            bass.forEach((note) => {
-                if (note.note > 0) {
-                    const osc = this.audioContext.createOscillator();
-                    const gainNode = this.audioContext.createGain();
-
-                    osc.type = 'triangle';
-                    osc.frequency.value = note.note;
-
-                    const noteStart = startTime + bassTime;
-                    const noteEnd = noteStart + note.duration;
-
-                    gainNode.gain.setValueAtTime(0.2, noteStart);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, noteEnd);
-
-                    osc.connect(gainNode);
-                    gainNode.connect(this.bgmGain);
-
-                    osc.start(noteStart);
-                    osc.stop(noteEnd);
+        if (bass && bass.length > 0) {
+            let bassTime = 0;
+            const patternDur = bass.reduce((s, n) => s + n.duration, 0);
+            if (patternDur > 0) {
+                while (bassTime < totalMelodyTime - 0.0001) {
+                    bass.forEach((note) => {
+                        if (bassTime >= totalMelodyTime) return;
+                        if (note.note > 0) {
+                            const osc = this.audioContext.createOscillator();
+                            const gainNode = this.audioContext.createGain();
+                            osc.type = 'triangle';
+                            osc.frequency.value = note.note;
+                            const noteStart = startTime + bassTime;
+                            const d = Math.min(note.duration, totalMelodyTime - bassTime);
+                            const noteEnd = noteStart + d;
+                            gainNode.gain.setValueAtTime(0.18, noteStart);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, noteEnd);
+                            osc.connect(gainNode);
+                            gainNode.connect(this.bgmGain);
+                            osc.start(noteStart);
+                            osc.stop(noteEnd);
+                        }
+                        bassTime += note.duration;
+                    });
                 }
-                bassTime += note.duration;
-            });
+            }
         }
 
-        // Loop the BGM
-        const totalDuration = melodyTime * 1000;
         setTimeout(() => {
-            if (this.isPlaying) {
-                this.playTetrisTheme();
+            if (this.isPlaying && onLoop) {
+                onLoop();
             }
-        }, totalDuration);
+        }, totalMelodyTime * 1000);
     }
 
     // ===== Toggle Mute =====

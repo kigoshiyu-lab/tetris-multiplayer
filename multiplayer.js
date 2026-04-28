@@ -162,6 +162,12 @@ const multiplayer = (() => {
         }
         return;
       }
+      if (message.type === 'item_effect') {
+        if (typeof window.onItemEffect === 'function') {
+          window.onItemEffect(message.itemType);
+        }
+        return;
+      }
       if (message.type === 'you_win') {
         setStatus('相手がゲームオーバー: あなたの勝ち');
         return;
@@ -231,6 +237,15 @@ const multiplayer = (() => {
     safeSend({ type: 'player_lost' });
   }
 
+  function sendItem(itemType) {
+    if (!joinedRoomId) return;
+    safeSend({ type: 'use_item', itemType });
+  }
+
+  function isInRoom() {
+    return Boolean(joinedRoomId && socket && socket.readyState === WebSocket.OPEN);
+  }
+
   function initUI() {
     joinBtnEl().addEventListener('click', joinRoom);
     leaveBtnEl().addEventListener('click', leaveRoom);
@@ -243,6 +258,8 @@ const multiplayer = (() => {
     initUI,
     readyForStart,
     sendGarbage,
-    notifyLost
+    notifyLost,
+    sendItem,
+    isInRoom
   };
 })();

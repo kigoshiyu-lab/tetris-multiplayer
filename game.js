@@ -47,11 +47,241 @@ let touchEndX = 0;
 let touchEndY = 0;
 const minSwipeDistance = 30;
 
+// ===== Items (versus) =====
+const itemInventory = {
+    fog_top: 0,
+    fog_bottom: 0,
+    control_swap: 0,
+    hide_stack: 0,
+    shuffle_stack: 0,
+    clear_bottom: 0
+};
+
+let effectControlSwapUntil = 0;
+let effectHideStackUntil = 0;
+let fogTopTimer = null;
+let fogBottomTimer = null;
+
 const lobbyPanelEl = () => document.getElementById('lobbyPanel');
 const lobbyHintEl = () => document.getElementById('lobbyHint');
 const gameContainerEl = () => document.getElementById('gameContainer');
 const countdownScreenEl = () => document.getElementById('countdownScreen');
 const countdownTextEl = () => document.getElementById('countdownText');
+const fogTopEl = () => document.getElementById('fogTop');
+const fogBottomEl = () => document.getElementById('fogBottom');
+
+function isControlSwapActive() {
+    return Date.now() < effectControlSwapUntil;
+}
+
+function isHideStackActive() {
+    return Date.now() < effectHideStackUntil;
+}
+
+function rotateMatrixCCW(matrix) {
+    const h = matrix.length;
+    const w = matrix[0].length;
+    return Array.from({ length: w }, (_, c) =>
+        Array.from({ length: h }, (_, r) => matrix[r][w - 1 - c])
+    );
+}
+
+function resetItemInventory() {
+    itemInventory.fog_top = 0;
+    itemInventory.fog_bottom = 0;
+    itemInventory.control_swap = 0;
+    itemInventory.hide_stack = 0;
+    itemInventory.shuffle_stack = 0;
+    itemInventory.clear_bottom = 0;
+    updateItemUI();
+}
+
+function clearItemEffectVisuals() {
+    effectControlSwapUntil = 0;
+    effectHideStackUntil = 0;
+    if (fogTopTimer) {
+        clearTimeout(fogTopTimer);
+        fogTopTimer = null;
+    }
+    if (fogBottomTimer) {
+        clearTimeout(fogBottomTimer);
+        fogBottomTimer = null;
+    }
+    const top = fogTopEl();
+    const bottom = fogBottomEl();
+    if (top) top.classList.add('hidden');
+    if (bottom) bottom.classList.add('hidden');
+}
+
+function grantItemsFromLineClear(linesCleared) {
+    if (linesCleared === 2) {
+        itemInventory.fog_top += 1;
+        itemInventory.fog_bottom += 1;
+    } else if (linesCleared === 3) {
+        itemInventory.control_swap += 1;
+        itemInventory.hide_stack += 1;
+        itemInventory.clear_bottom += 1;
+    } else if (linesCleared === 4) {
+        itemInventory.shuffle_stack += 1;
+    }
+    updateItemUI();
+}
+
+function updateItemUI() {
+    document.querySelectorAll('.item-count').forEach((el) => {
+        const key = el.getAttribute('data-count');
+        if (!key || itemInventory[key] === undefined) return;
+        const n = itemInventory[key];
+        el.textContent = String(n);
+        const btn = el.closest('.item-btn');
+        if (btn) {
+            btn.disabled = n <= 0;
+            btn.classList.toggle('item-disabled', n <= 0);
+        }
+    });
+}
+
+function showFogTop() {
+    const el = fogTopEl();
+    if (!el) return;
+    el.classList.remove('hidden');
+    if (fogTopTimer) clearTimeout(fogTopTimer);
+    fogTopTimer = setTimeout(() => {
+        el.classList.add('hidden');
+        fogTopTimer = null;
+    }, 5000);
+}
+
+function showFogBottom() {
+    const el = fogBottomEl();
+    if (!el) return;
+    el.classList.remove('hidden');
+    if (fogBottomTimer) clearTimeout(fogBottomTimer);
+    fogBottomTimer = setTimeout(() => {
+        el.classList.add('hidden');
+        fogBottomTimer = null;
+    }, 5000);
+}
+
+function applyControlSwapDebuff() {
+    effectControlSwapUntil = Date.now() + 10000;
+}
+
+function applyHideStackDebuff() {
+    effectHideStackUntil = Date.now() + 10000;
+}
+
+function shuffleOpponentStack() {
+    const cells = [];
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            if (board[r][c]) {
+                cells.push(board[r][c]);
+            }
+        }
+    }
+    for (let i = cells.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cells[i], cells[j]] = [cells[j], cells[i]];
+    }
+    let k = 0;
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            if (board[r][c]) {
+                board[r][c] = cells[k];
+                k += 1;
+            }
+        }
+    }
+    if (currentPiece && checkCollision(currentPiece.x, currentPiece.y, currentPiece.shape)) {
+        gameOver = true;
+        showGameOver();
+    }
+}
+
+function clearBottomRowHelp() {
+    board[ROWS - 1] = Array(COLS).fill(0);
+}
+
+function useItem(itemType) {
+    if (!hasActiveRound || gameOver || isPaused) return;
+    if (!itemInventory[itemType] || itemInventory[itemType] <= 0) return;
+    if (itemType !== 'clear_bottom' && !multiplayer.isInRoom()) {
+        return;
+    }
+
+    gameAudio.resume();
+    gameAudio.playItemUse();
+
+    itemInventory[itemType] -= 1;
+    updateItemUI();
+
+    if (itemType === 'clear_bottom') {
+        clearBottomRowHelp();
+        return;
+    }
+
+    multiplayer.sendItem(itemType);
+}
+
+window.onItemEffect = (itemType) => {
+    if (!hasActiveRound) return;
+    gameAudio.playItemUse();
+    switch (itemType) {
+        case 'fog_top':
+            showFogTop();
+            break;
+        case 'fog_bottom':
+            showFogBottom();
+            break;
+        case 'control_swap':
+            applyControlSwapDebuff();
+            break;
+        case 'hide_stack':
+            applyHideStackDebuff();
+            break;
+        case 'shuffle_stack':
+            shuffleOpponentStack();
+            break;
+        default:
+            break;
+    }
+};
+
+function setupHelpModal() {
+    const modal = document.getElementById('helpModal');
+    const openBtn = document.getElementById('openHelpBtn');
+    const closeBtn = document.getElementById('closeHelpBtn');
+    const backdrop = modal && modal.querySelector('.help-modal-backdrop');
+    if (!modal || !openBtn || !closeBtn) return;
+
+    function openModal() {
+        modal.classList.remove('hidden');
+        modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeModal() {
+        modal.classList.add('hidden');
+        modal.setAttribute('aria-hidden', 'true');
+    }
+
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    if (backdrop) {
+        backdrop.addEventListener('click', closeModal);
+    }
+}
+
+function setupItemControls() {
+    const grid = document.getElementById('itemGrid');
+    if (!grid) return;
+    grid.addEventListener('click', (e) => {
+        const btn = e.target.closest('.item-btn');
+        if (!btn || btn.disabled) return;
+        const item = btn.getAttribute('data-item');
+        if (item) useItem(item);
+    });
+}
 
 // ===== Initialize Game =====
 function init() {
@@ -70,7 +300,10 @@ function init() {
 
     // Mobile touch controls
     setupMobileControls();
+    setupHelpModal();
+    setupItemControls();
     multiplayer.initUI();
+    updateItemUI();
 
     // Resume audio context on first user interaction
     document.addEventListener('click', () => {
@@ -205,6 +438,10 @@ function checkCollision(x, y, shape) {
 function movePiece(dx, dy) {
     if (gameOver || isPaused || !hasActiveRound) return;
 
+    if (dx !== 0 && isControlSwapActive()) {
+        dx = -dx;
+    }
+
     const newX = currentPiece.x + dx;
     const newY = currentPiece.y + dy;
 
@@ -221,9 +458,11 @@ function movePiece(dx, dy) {
 function rotatePiece() {
     if (gameOver || isPaused || !hasActiveRound) return;
 
-    const rotated = currentPiece.shape[0].map((_, i) =>
-        currentPiece.shape.map(row => row[i]).reverse()
-    );
+    const rotated = isControlSwapActive()
+        ? rotateMatrixCCW(currentPiece.shape)
+        : currentPiece.shape[0].map((_, i) =>
+            currentPiece.shape.map(row => row[i]).reverse()
+        );
 
     if (!checkCollision(currentPiece.x, currentPiece.y, rotated)) {
         currentPiece.shape = rotated;
@@ -290,6 +529,8 @@ function clearLines() {
 
         // First multiplayer rule: send the same number of cleared lines.
         multiplayer.sendGarbage(linesCleared);
+
+        grantItemsFromLineClear(linesCleared);
     }
 }
 
@@ -382,10 +623,18 @@ function draw() {
     }
 
     // Draw locked pieces
+    const dimStack = isHideStackActive();
     for (let row = 0; row < ROWS; row++) {
         for (let col = 0; col < COLS; col++) {
             if (board[row][col]) {
-                drawBlock(ctx, col * BLOCK_SIZE, row * BLOCK_SIZE, board[row][col]);
+                if (dimStack) {
+                    drawHiddenStackBlock(
+                        col * BLOCK_SIZE,
+                        row * BLOCK_SIZE
+                    );
+                } else {
+                    drawBlock(ctx, col * BLOCK_SIZE, row * BLOCK_SIZE, board[row][col]);
+                }
             }
         }
     }
@@ -427,6 +676,14 @@ function drawBlock(context, x, y, color) {
     context.strokeStyle = '#000';
     context.lineWidth = 2;
     context.strokeRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
+}
+
+function drawHiddenStackBlock(x, y) {
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
 }
 
 // ===== Draw Next Piece =====
@@ -474,6 +731,8 @@ function resetToLobby() {
         clearInterval(countdownTimer);
         countdownTimer = null;
     }
+    clearItemEffectVisuals();
+    resetItemInventory();
     board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
     currentPiece = null;
     nextPiece = null;
@@ -503,6 +762,8 @@ function setLobbyState(message) {
 
 // ===== Start Round =====
 function startRound() {
+    clearItemEffectVisuals();
+    resetItemInventory();
     board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
     score = 0;
     lines = 0;
@@ -521,7 +782,7 @@ function startRound() {
     updateScore();
     nextPiece = createPiece();
     spawnPiece();
-    gameAudio.startBGM();
+    gameAudio.startBGMNewRound();
 }
 
 function startCountdownAndRound() {
@@ -529,13 +790,24 @@ function startCountdownAndRound() {
         clearInterval(countdownTimer);
     }
 
+    gameAudio.resume();
+
     const sequence = ['3', '2', '1', 'START'];
     let index = 0;
     const overlay = countdownScreenEl();
     const textEl = countdownTextEl();
 
+    function playCountdownSoundForStep(i) {
+        if (i < 3) {
+            gameAudio.playCountdownTick(i);
+        } else {
+            gameAudio.playCountdownStart();
+        }
+    }
+
     overlay.classList.remove('hidden');
     textEl.textContent = sequence[index];
+    playCountdownSoundForStep(0);
 
     countdownTimer = setInterval(() => {
         index += 1;
@@ -547,6 +819,7 @@ function startCountdownAndRound() {
             return;
         }
         textEl.textContent = sequence[index];
+        playCountdownSoundForStep(index);
     }, 700);
 }
 

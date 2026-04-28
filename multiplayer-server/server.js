@@ -116,6 +116,23 @@ wss.on('connection', (ws) => {
       if (!roomId || !rooms.has(roomId)) return;
       const room = rooms.get(roomId);
       broadcast(room, { type: 'you_win' }, ws);
+      return;
+    }
+
+    if (message.type === 'use_item') {
+      const roomId = ws.meta.roomId;
+      if (!roomId || !rooms.has(roomId)) return;
+      const itemType = String(message.itemType || '');
+      const allowed = new Set([
+        'fog_top',
+        'fog_bottom',
+        'control_swap',
+        'hide_stack',
+        'shuffle_stack'
+      ]);
+      if (!allowed.has(itemType)) return;
+      const room = rooms.get(roomId);
+      broadcast(room, { type: 'item_effect', itemType }, ws);
     }
   });
 
