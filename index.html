@@ -70,7 +70,10 @@
             <!-- Left Panel: Next Piece -->
             <div class="side-panel">
                 <div class="panel-card">
-                    <h2>次のピース</h2>
+                    <div class="next-preview-left">
+                        <h2>次のピース</h2>
+                        <canvas id="nextCanvas" width="64" height="64"></canvas>
+                    </div>
                     <div class="item-inline-wrap">
                         <div class="item-inline-title">アイテム</div>
                         <div class="item-inline-grid" id="itemGrid">
@@ -95,7 +98,6 @@
                         </div>
                         <div id="itemGetToast" class="item-get-toast hidden">get!</div>
                     </div>
-                    <canvas id="nextCanvas" width="64" height="64"></canvas>
                 </div>
                 <div class="panel-card controls-info">
                     <h2>操作方法</h2>
