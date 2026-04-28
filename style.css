@@ -690,6 +690,7 @@ header {
 
     .mobile-play-area {
         gap: 0.35rem;
+        align-items: flex-end;
     }
 
     .mobile-controls {
@@ -702,6 +703,7 @@ header {
 
     .mobile-controls-left {
         width: 100px;
+        margin-bottom: 0.2rem;
     }
 
     .dpad-btn {
@@ -712,6 +714,10 @@ header {
     .action-btn {
         width: 56px;
         height: 56px;
+    }
+
+    .mobile-controls-right {
+        margin-bottom: 0.2rem;
     }
 
     .control-btn svg {
