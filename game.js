@@ -78,11 +78,11 @@ const helpPreviewCanvasEl = () => document.getElementById('itemPreviewCanvas');
 const HELP_ITEM_PREVIEWS = {
     fog_top: {
         title: '🌫 霧・上',
-        description: '上側に霧が発生し、相手の上3段が見えにくくなります。'
+        description: '上側に霧が発生し、相手の上3段が15秒間見えなくなります。'
     },
     fog_bottom: {
         title: '🌫 霧・下',
-        description: '下側に霧が発生し、相手の下3段が見えにくくなります。'
+        description: '下側に霧が発生し、相手の下3段が15秒間見えなくなります。'
     },
     control_swap: {
         title: '🔀 混乱',
@@ -193,7 +193,7 @@ function showFogTop() {
     fogTopTimer = setTimeout(() => {
         el.classList.add('hidden');
         fogTopTimer = null;
-    }, 5000);
+    }, 15000);
 }
 
 function showFogBottom() {
@@ -204,7 +204,7 @@ function showFogBottom() {
     fogBottomTimer = setTimeout(() => {
         el.classList.add('hidden');
         fogBottomTimer = null;
-    }, 5000);
+    }, 15000);
 }
 
 function applyControlSwapDebuff() {

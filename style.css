@@ -1356,4 +1356,20 @@ header {
         height: 2rem;
         font-size: 1.1rem;
     }
+
+    .result-actions {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        gap: 0.55rem;
+    }
+
+    .result-actions .restart-btn {
+        flex: 1;
+        min-width: 0;
+        white-space: nowrap;
+        font-size: 0.56rem;
+        padding: 0.72rem 0.35rem;
+        line-height: 1.25;
+    }
 }

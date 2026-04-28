@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20260428-2">
 </head>
 
 <body>
@@ -50,8 +50,8 @@
                     <section>
                         <h3>相手攻撃（同時消去で取得）</h3>
                         <ul>
-                            <li><button type="button" class="help-item-trigger" data-preview-item="fog_top">🌫 霧・上（2列同時）</button>：相手の上3段を5秒間完全に見えなくする</li>
-                            <li><button type="button" class="help-item-trigger" data-preview-item="fog_bottom">🌫 霧・下（2列同時）</button>：相手の下3段を5秒間完全に見えなくする</li>
+                            <li><button type="button" class="help-item-trigger" data-preview-item="fog_top">🌫 霧・上（2列同時）</button>：相手の上3段を15秒間完全に見えなくする</li>
+                            <li><button type="button" class="help-item-trigger" data-preview-item="fog_bottom">🌫 霧・下（2列同時）</button>：相手の下3段を15秒間完全に見えなくする</li>
                             <li><button type="button" class="help-item-trigger" data-preview-item="control_swap">🔀 混乱（3列同時）</button>：相手に10秒間、左右移動と回転が逆になる</li>
                             <li><button type="button" class="help-item-trigger" data-preview-item="hide_stack">🌑 暗闇（3列同時）</button>：相手に10秒間、積みブロックが完全に見えなくなる（操作中ミノは見える）</li>
                             <li><button type="button" class="help-item-trigger" data-preview-item="shuffle_stack">🎲 撹乱（4列同時）</button>：相手の積みブロックの色をランダムに入れ替える</li>
@@ -88,7 +88,7 @@
                                 <span class="item-icon">🌫</span>
                                 <span class="item-meta">
                                     <span class="item-name">上霧</span>
-                                    <span class="item-effect">相手の上3段を5秒間ブラックアウト</span>
+                                    <span class="item-effect">相手の上3段を15秒間ブラックアウト</span>
                                 </span>
                                 <span class="item-count" data-count="fog_top">0</span>
                             </button>
@@ -96,7 +96,7 @@
                                 <span class="item-icon">🌫</span>
                                 <span class="item-meta">
                                     <span class="item-name">下霧</span>
-                                    <span class="item-effect">相手の下3段を5秒間ブラックアウト</span>
+                                    <span class="item-effect">相手の下3段を15秒間ブラックアウト</span>
                                 </span>
                                 <span class="item-count" data-count="fog_bottom">0</span>
                             </button>
@@ -247,9 +247,9 @@
         </div>
     </div>
 
-    <script src="audio.js"></script>
-    <script src="multiplayer.js"></script>
-    <script src="game.js"></script>
+    <script src="audio.js?v=20260428-2"></script>
+    <script src="multiplayer.js?v=20260428-2"></script>
+    <script src="game.js?v=20260428-2"></script>
 </body>
 
 </html>
