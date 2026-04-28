@@ -170,6 +170,9 @@ const multiplayer = (() => {
       }
       if (message.type === 'you_win') {
         setStatus('相手がゲームオーバー: あなたの勝ち');
+        if (typeof window.onYouWin === 'function') {
+          window.onYouWin();
+        }
         return;
       }
       if (message.type === 'opponent_left') {
@@ -260,6 +263,7 @@ const multiplayer = (() => {
     sendGarbage,
     notifyLost,
     sendItem,
-    isInRoom
+    isInRoom,
+    leaveRoom
   };
 })();

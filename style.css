@@ -461,6 +461,16 @@ header {
     box-shadow: 2px 2px 0 #000;
 }
 
+.result-actions {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: center;
+}
+
+.secondary-btn {
+    background: var(--nes-blue);
+}
+
 /* ===== Mobile Touch Controls ===== */
 .mobile-controls {
     display: none;
@@ -672,6 +682,122 @@ header {
 
 .item-btn-help {
     border-color: var(--nes-green);
+}
+
+@media (min-width: 1025px) {
+    :root {
+        --pc-board-width: clamp(340px, min(34vw, 44vh), 520px);
+    }
+
+    body {
+        align-items: center;
+        overflow: hidden;
+    }
+
+    .container {
+        width: min(98vw, 1500px);
+        max-width: none;
+        height: 96vh;
+        margin: 0 auto;
+        padding: 0.9rem 1.2rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .game-title {
+        font-size: 1.6rem;
+    }
+
+    .game-container {
+        width: 100%;
+        flex: 1;
+        display: grid;
+        grid-template-columns: minmax(280px, 360px) minmax(var(--pc-board-width), 1fr) minmax(280px, 360px);
+        align-items: start;
+        justify-items: center;
+        gap: 1.4rem;
+        overflow: hidden;
+    }
+
+    .side-panel {
+        min-width: 280px;
+        gap: 1rem;
+    }
+
+    .panel-card h2 {
+        font-size: 0.9rem;
+    }
+
+    .controls-info {
+        font-size: 0.68rem;
+    }
+
+    .control-item {
+        margin-bottom: 0.7rem;
+    }
+
+    .key {
+        padding: 0.3rem 0.45rem;
+    }
+
+    #nextCanvas {
+        width: clamp(72px, min(6vw, 10vh), 104px);
+        height: clamp(72px, min(6vw, 10vh), 104px);
+    }
+
+    #gameCanvas {
+        width: var(--pc-board-width);
+        height: calc(var(--pc-board-width) * 2);
+    }
+
+    .mobile-play-area {
+        justify-content: center;
+        min-width: calc(var(--pc-board-width) + 40px);
+    }
+
+    .side-panel-right {
+        position: sticky;
+        top: 1.2rem;
+        align-self: start;
+    }
+
+    .side-panel-right .panel-card {
+        width: 100%;
+    }
+
+    .score-display {
+        font-size: 1.9rem;
+    }
+
+    .item-inline-title {
+        font-size: 0.78rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .item-inline-grid {
+        grid-template-columns: 1fr;
+        gap: 0.55rem;
+    }
+
+    .item-btn {
+        min-height: 4.6rem;
+        border-width: 3px;
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 0.5rem 0.65rem;
+    }
+
+    .item-icon {
+        font-size: 1.35rem;
+    }
+
+    .item-count {
+        font-size: 0.58rem;
+        min-width: 1.6rem;
+        padding: 0.16rem 0.32rem;
+        position: static;
+        margin-left: 0.6rem;
+    }
 }
 
 @media (max-width: 640px) {

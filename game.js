@@ -328,7 +328,8 @@ function init() {
 
     // Event listeners
     document.addEventListener('keydown', handleKeyPress);
-    document.getElementById('restartBtn').addEventListener('click', () => multiplayer.readyForStart());
+    document.getElementById('restartBtn').addEventListener('click', handleRematchClick);
+    document.getElementById('backToLobbyBtn').addEventListener('click', handleBackToLobbyClick);
     document.getElementById('muteBtn').addEventListener('click', toggleMute);
 
     // Mobile touch controls
@@ -390,6 +391,10 @@ window.onRoomJoined = (players) => {
     if (players < 2) {
         setLobbyState('接続完了。対戦相手を待っています...');
     }
+};
+
+window.onYouWin = () => {
+    showResultScreen('勝利！', '相手が上まで積みました。あなたの勝ちです！');
 };
 
 window.onMatchStart = () => {
@@ -772,12 +777,35 @@ function updateScore() {
 
 // ===== Show Game Over =====
 function showGameOver() {
-    document.getElementById('finalScore').textContent = score;
-    document.getElementById('gameOverScreen').classList.remove('hidden');
     gameAudio.stopBGM();
     gameAudio.playGameOver();
     hasActiveRound = false;
+    showResultScreen('敗北…', 'あなたは上まで積みました。');
     multiplayer.notifyLost();
+}
+
+function showResultScreen(title, message) {
+    hasActiveRound = false;
+    isPaused = true;
+    waitingForOpponent = true;
+    document.querySelector('.game-over-title').textContent = title;
+    document.getElementById('resultMessage').textContent = message;
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('gameOverScreen').classList.remove('hidden');
+}
+
+function handleRematchClick() {
+    document.getElementById('gameOverScreen').classList.add('hidden');
+    resetToLobby();
+    setLobbyState('再戦待機中... 「ゲームを開始します」を押してください');
+    multiplayer.readyForStart();
+}
+
+function handleBackToLobbyClick() {
+    document.getElementById('gameOverScreen').classList.add('hidden');
+    multiplayer.leaveRoom();
+    resetToLobby();
+    setLobbyState('ルーム参加して対戦を開始してください');
 }
 
 function resetToLobby() {

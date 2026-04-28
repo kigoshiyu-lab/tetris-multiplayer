@@ -161,8 +161,12 @@
                     <div id="gameOverScreen" class="game-over-screen hidden">
                         <div class="game-over-content">
                             <h2 class="game-over-title">ゲームオーバー</h2>
+                            <p class="final-score" id="resultMessage">結果</p>
                             <p class="final-score">スコア: <span id="finalScore">0</span></p>
-                            <button id="restartBtn" class="restart-btn">もう一度プレイ</button>
+                            <div class="result-actions">
+                                <button id="restartBtn" class="restart-btn">もう一度プレイ</button>
+                                <button id="backToLobbyBtn" class="restart-btn secondary-btn">ロビーに戻る</button>
+                            </div>
                         </div>
                     </div>
                     <div id="pauseScreen" class="pause-screen hidden">
