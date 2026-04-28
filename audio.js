@@ -184,6 +184,7 @@ class ChiptuneAudio {
         this.currentBGM = null;
         this.isPlaying = false;
         this.isMuted = false;
+        this.longTrackCache = {};
 
         this.initAudio();
     }
@@ -361,18 +362,115 @@ class ChiptuneAudio {
 
     playActiveBgmTrack() {
         if (!this.isPlaying || this.isMuted) return;
-        const track = BGM_CLASSICAL_TRACKS[this.activeBgmTrack];
+        const trackIndex = this.activeBgmTrack;
+        const track = BGM_CLASSICAL_TRACKS[trackIndex];
         if (!track) {
             this.activeBgmTrack = 0;
             return this.playActiveBgmTrack();
         }
+
+        if (!this.longTrackCache[trackIndex]) {
+            this.longTrackCache[trackIndex] = this.buildTwoMinuteTrack(track);
+        }
+        const longTrack = this.longTrackCache[trackIndex];
+
         this.playMelodySequence(
-            track.melody,
-            track.bass,
+            longTrack.melody,
+            longTrack.bass,
             () => {
                 if (this.isPlaying) this.playActiveBgmTrack();
             }
         );
+    }
+
+    getSequenceDuration(sequence) {
+        return sequence.reduce((sum, note) => sum + note.duration, 0);
+    }
+
+    transposeSequence(sequence, semitones) {
+        const ratio = Math.pow(2, semitones / 12);
+        return sequence.map((note) => {
+            if (!note.note) return { note: 0, duration: note.duration };
+            const hz = note.note * ratio;
+            return {
+                note: Math.max(98, Math.min(1760, hz)),
+                duration: note.duration
+            };
+        });
+    }
+
+    reverseByChunks(sequence, chunkSize = 8) {
+        const out = [];
+        for (let i = 0; i < sequence.length; i += chunkSize) {
+            const chunk = sequence.slice(i, i + chunkSize);
+            out.push(...chunk.reverse().map((n) => ({ note: n.note, duration: n.duration })));
+        }
+        return out;
+    }
+
+    rhythmicSwing(sequence, factor = 1.0) {
+        return sequence.map((note, i) => ({
+            note: note.note,
+            duration: Math.max(0.07, note.duration * factor * (i % 2 === 0 ? 1.08 : 0.92))
+        }));
+    }
+
+    createBridgeSection(track, sectionIndex) {
+        const rootCandidates = track.bass.filter((n) => n.note > 0).map((n) => n.note);
+        const root = rootCandidates.length ? rootCandidates[sectionIndex % rootCandidates.length] : 196;
+        return {
+            melody: [
+                { note: root, duration: 0.22 },
+                { note: root * 1.25, duration: 0.22 },
+                { note: root * 1.5, duration: 0.22 },
+                { note: root * 2.0, duration: 0.22 },
+                { note: root * 1.5, duration: 0.22 },
+                { note: root * 1.25, duration: 0.22 },
+                { note: root, duration: 0.22 },
+                { note: 0, duration: 0.22 }
+            ],
+            bass: [
+                { note: root / 2, duration: 0.44 },
+                { note: 0, duration: 0.22 },
+                { note: root / 1.5, duration: 0.44 },
+                { note: 0, duration: 0.22 }
+            ]
+        };
+    }
+
+    buildTwoMinuteTrack(track) {
+        const targetSec = 120;
+        const melody = [];
+        const bass = [];
+        let elapsed = 0;
+        let sectionIndex = 0;
+
+        const append = (mel, bs) => {
+            melody.push(...mel);
+            bass.push(...bs);
+            elapsed += this.getSequenceDuration(mel);
+        };
+
+        while (elapsed < targetSec) {
+            const mode = sectionIndex % 6;
+            if (mode === 0) {
+                append(track.melody, track.bass);
+            } else if (mode === 1) {
+                append(this.transposeSequence(track.melody, 2), this.transposeSequence(track.bass, 2));
+            } else if (mode === 2) {
+                append(this.rhythmicSwing(track.melody, 0.95), this.rhythmicSwing(track.bass, 1.0));
+            } else if (mode === 3) {
+                append(this.transposeSequence(track.melody, -3), this.transposeSequence(track.bass, -3));
+            } else if (mode === 4) {
+                append(this.reverseByChunks(track.melody), track.bass);
+            } else {
+                const bridge = this.createBridgeSection(track, sectionIndex);
+                append(bridge.melody, bridge.bass);
+            }
+            sectionIndex += 1;
+        }
+
+        return { melody, bass };
     }
 
     playMelodySequence(melody, bass, onLoop) {

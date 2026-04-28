@@ -690,7 +690,9 @@ function drawHiddenStackBlock(x, y) {
 function drawNextPiece() {
     nextCtx.setTransform(1, 0, 0, 1, 0, 0);
     nextCtx.globalAlpha = 1;
-    nextCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    nextCtx.globalCompositeOperation = 'source-over';
+    nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+    nextCtx.fillStyle = '#000';
     nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
 
     if (nextPiece) {

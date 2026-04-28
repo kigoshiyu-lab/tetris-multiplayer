@@ -517,6 +517,56 @@ header {
     .controls-info {
         display: none;
     }
+
+    .side-panel-right {
+        position: fixed;
+        top: 50%;
+        right: 0.4rem;
+        transform: translateY(-50%);
+        width: 96px;
+        z-index: 1200;
+    }
+
+    .side-panel-right .panel-card:not(.item-panel) {
+        display: none;
+    }
+
+    .side-panel-right .item-panel {
+        padding: 0.45rem 0.3rem;
+    }
+
+    .side-panel-right .item-panel h2 {
+        font-size: 0.42rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .side-panel-right .item-panel-hint {
+        font-size: 0.3rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .side-panel-right .item-grid {
+        grid-template-columns: 1fr;
+        gap: 0.25rem;
+    }
+
+    .side-panel-right .item-btn {
+        min-height: 2.45rem;
+        padding: 0.2rem 0.1rem;
+        font-size: 0.26rem;
+    }
+
+    .side-panel-right .item-icon {
+        font-size: 0.58rem;
+    }
+
+    .side-panel-right .item-name {
+        font-size: 0.24rem;
+    }
+
+    .side-panel-right .item-count {
+        font-size: 0.28rem;
+    }
 }
 
 /* Items (right column) */
@@ -625,5 +675,14 @@ header {
 
     .multiplayer-controls {
         grid-template-columns: 1fr;
+    }
+
+    .side-panel-right {
+        right: 0.2rem;
+        width: 86px;
+    }
+
+    .side-panel-right .item-btn {
+        min-height: 2.2rem;
     }
 }
