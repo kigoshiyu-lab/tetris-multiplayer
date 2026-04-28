@@ -2,6 +2,7 @@
 const COLS = 10;
 const ROWS = 20;
 const BLOCK_SIZE = 30;
+const NEXT_BLOCK_SIZE = 14;
 const COLORS = {
     I: '#b5f5fd', // Cyan
     O: '#f8b800', // Yellow
@@ -67,6 +68,7 @@ let itemGetToastTimer = null;
 const lobbyPanelEl = () => document.getElementById('lobbyPanel');
 const lobbyHintEl = () => document.getElementById('lobbyHint');
 const gameContainerEl = () => document.getElementById('gameContainer');
+const headerEl = () => document.querySelector('header');
 const countdownScreenEl = () => document.getElementById('countdownScreen');
 const countdownTextEl = () => document.getElementById('countdownText');
 const fogTopEl = () => document.getElementById('fogTop');
@@ -409,11 +411,15 @@ window.onLobbyWaiting = (message) => {
 };
 
 function showLobbyScreen() {
+    const h = headerEl();
+    if (h) h.classList.remove('hidden');
     lobbyPanelEl().classList.remove('hidden');
     gameContainerEl().classList.add('hidden');
 }
 
 function showGameScreen() {
+    const h = headerEl();
+    if (h) h.classList.add('hidden');
     lobbyPanelEl().classList.add('hidden');
     gameContainerEl().classList.remove('hidden');
 }
@@ -717,6 +723,21 @@ function drawHiddenStackBlock(x, y) {
     ctx.strokeRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
 }
 
+function drawBlockAtSize(context, x, y, color, size) {
+    const s = Math.max(2, Math.floor(size * 0.16));
+    context.fillStyle = color;
+    context.fillRect(x, y, size, size);
+    context.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    context.fillRect(x, y, size, s);
+    context.fillRect(x, y, s, size);
+    context.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    context.fillRect(x, y + size - s, size, s);
+    context.fillRect(x + size - s, y, s, size);
+    context.strokeStyle = '#000';
+    context.lineWidth = 1;
+    context.strokeRect(x, y, size, size);
+}
+
 // ===== Draw Next Piece =====
 function drawNextPiece() {
     nextCtx.setTransform(1, 0, 0, 1, 0, 0);
@@ -727,15 +748,15 @@ function drawNextPiece() {
     nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
 
     if (nextPiece) {
-        const offsetX = (nextCanvas.width - nextPiece.shape[0].length * BLOCK_SIZE) / 2;
-        const offsetY = (nextCanvas.height - nextPiece.shape.length * BLOCK_SIZE) / 2;
+        const offsetX = (nextCanvas.width - nextPiece.shape[0].length * NEXT_BLOCK_SIZE) / 2;
+        const offsetY = (nextCanvas.height - nextPiece.shape.length * NEXT_BLOCK_SIZE) / 2;
 
         for (let row = 0; row < nextPiece.shape.length; row++) {
             for (let col = 0; col < nextPiece.shape[row].length; col++) {
                 if (nextPiece.shape[row][col]) {
-                    const x = offsetX + col * BLOCK_SIZE;
-                    const y = offsetY + row * BLOCK_SIZE;
-                    drawBlock(nextCtx, x, y, nextPiece.color);
+                    const x = offsetX + col * NEXT_BLOCK_SIZE;
+                    const y = offsetY + row * NEXT_BLOCK_SIZE;
+                    drawBlockAtSize(nextCtx, x, y, nextPiece.color, NEXT_BLOCK_SIZE);
                 }
             }
         }

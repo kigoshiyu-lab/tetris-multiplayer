@@ -669,13 +669,23 @@ header {
 }
 
 @media (max-width: 640px) {
+    body {
+        overflow-y: auto;
+        align-items: flex-start;
+    }
+
+    .container {
+        margin-top: 0.35rem;
+        padding-top: 0.6rem;
+    }
+
     .game-title {
         font-size: 1rem;
     }
 
     #gameCanvas {
-        width: 200px !important;
-        height: 400px !important;
+        width: 175px !important;
+        height: 350px !important;
     }
 
     .mobile-play-area {
@@ -716,5 +726,5 @@ header {
     .game-container { padding-bottom: 0; }
 
     .item-inline-grid { grid-template-columns: repeat(6, 1fr); }
-    #nextCanvas { width: 72px; height: 72px; }
+    #nextCanvas { width: 56px; height: 56px; }
 }
