@@ -98,7 +98,7 @@ const HELP_ITEM_PREVIEWS = {
     },
     clear_bottom: {
         title: '⬆ 最下段解除',
-        description: '自分の最下段1列を消し、立て直しに使えます。'
+        description: '最下段を消して盤面全体を1段下げ、立て直しに使えます。'
     }
 };
 
@@ -244,7 +244,9 @@ function shuffleOpponentStack() {
 }
 
 function clearBottomRowHelp() {
-    board[ROWS - 1] = Array(COLS).fill(0);
+    // Remove the bottom row and shift all locked blocks down by one row.
+    board.pop();
+    board.unshift(Array(COLS).fill(0));
 }
 
 function useItem(itemType) {
@@ -419,7 +421,7 @@ function setupHelpModal() {
         if (itemType === 'clear_bottom') {
             pctx.fillStyle = '#00a800';
             pctx.font = "12px 'Press Start 2P'";
-            pctx.fillText('bottom row clear', 150, 56);
+            pctx.fillText('clear + shift down', 150, 56);
         }
     }
 
