@@ -293,6 +293,16 @@ function setupItemControls() {
     });
 }
 
+function setupQuickPreviewButton() {
+    const quickBtn = document.getElementById('quickPreviewBtn');
+    if (!quickBtn) return;
+    quickBtn.addEventListener('click', () => {
+        resetToLobby();
+        showGameScreen();
+        startRound();
+    });
+}
+
 function showItemGetToast() {
     const toast = document.getElementById('itemGetToast');
     if (!toast) return;
@@ -323,6 +333,7 @@ function init() {
     setupMobileControls();
     setupHelpModal();
     setupItemControls();
+    setupQuickPreviewButton();
     multiplayer.initUI();
     updateItemUI();
 
