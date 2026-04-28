@@ -709,7 +709,7 @@ header {
     .mobile-controls-right {
         display: flex;
         position: absolute;
-        right: -1.25rem;
+        right: -2.35rem;
         bottom: -2.35rem;
         margin-bottom: 0;
     }
@@ -717,7 +717,7 @@ header {
     .mobile-controls-left {
         width: 100px;
         position: absolute;
-        left: -1.25rem;
+        left: -2.35rem;
         bottom: -2.35rem;
         margin-bottom: 0;
     }
@@ -747,10 +747,21 @@ header {
     #nextCanvas { width: 56px; height: 56px; }
 
     .item-btn {
-        min-height: 3.2rem;
+        min-height: 4.2rem;
+        border-width: 3px;
+        padding: 0.25rem 0.15rem;
     }
 
     .item-icon {
-        font-size: 0.88rem;
+        font-size: 1.15rem;
+    }
+
+    .item-count {
+        font-size: 0.42rem;
+        min-width: 1.25rem;
+    }
+
+    .item-inline-title {
+        font-size: 0.55rem;
     }
 }
