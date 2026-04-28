@@ -1028,6 +1028,7 @@ function resetToLobby() {
     countdownScreenEl().classList.add('hidden');
     document.getElementById('gameOverScreen').classList.add('hidden');
     document.getElementById('pauseScreen').classList.add('hidden');
+    gameAudio.startLobbyBGM();
 }
 
 function showDisconnectWinAndReturn() {

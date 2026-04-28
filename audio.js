@@ -185,6 +185,10 @@ class ChiptuneAudio {
         this.isPlaying = false;
         this.isMuted = false;
         this.longTrackCache = {};
+        this.activeBgmType = 'lobby';
+        this.currentAudioBgm = null;
+        this.lobbyBgm = null;
+        this.gameplayBgm = null;
 
         this.initAudio();
     }
@@ -209,6 +213,37 @@ class ChiptuneAudio {
             this.sfxGain.connect(this.masterGain);
         } catch (e) {
             console.error('Web Audio API not supported:', e);
+        }
+
+        this.initFileBgm();
+    }
+
+    initFileBgm() {
+        this.lobbyBgm = new Audio('BGM/lobby.mp3');
+        this.gameplayBgm = new Audio('BGM/gameplay.mp3');
+        [this.lobbyBgm, this.gameplayBgm].forEach((bgm) => {
+            bgm.loop = true;
+            bgm.preload = 'auto';
+            bgm.volume = 0.45;
+        });
+    }
+
+    playFileBgm(type) {
+        if (this.isMuted) return;
+        const next = type === 'gameplay' ? this.gameplayBgm : this.lobbyBgm;
+        if (!next) return;
+
+        this.activeBgmType = type;
+        if (this.currentAudioBgm && this.currentAudioBgm !== next) {
+            this.currentAudioBgm.pause();
+            this.currentAudioBgm.currentTime = 0;
+        }
+        this.currentAudioBgm = next;
+        this.isPlaying = true;
+
+        const playPromise = next.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch(() => { });
         }
     }
 
@@ -339,16 +374,23 @@ class ChiptuneAudio {
     // ===== BGM: random classical loop (8-bit) =====
     /** 一時停止解除・初回など：今選ばれている曲のループ先頭から */
     startBGM() {
-        return;
+        this.playFileBgm(this.activeBgmType || 'lobby');
     }
 
     /** 対戦ラウンド開始時：毎回ランダムに1曲選ぶ */
     startBGMNewRound() {
-        return;
+        this.playFileBgm('gameplay');
+    }
+
+    startLobbyBGM() {
+        this.playFileBgm('lobby');
     }
 
     stopBGM() {
         this.isPlaying = false;
+        if (this.currentAudioBgm) {
+            this.currentAudioBgm.pause();
+        }
         if (this.currentBGM) {
             this.currentBGM.forEach(node => {
                 if (node && node.stop) {
