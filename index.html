@@ -70,7 +70,31 @@
             <div class="side-panel">
                 <div class="panel-card">
                     <h2>次のピース</h2>
-                    <canvas id="nextCanvas" width="120" height="120"></canvas>
+                    <div class="item-inline-wrap">
+                        <div class="item-inline-title">アイテム</div>
+                        <div class="item-inline-grid" id="itemGrid">
+                            <button type="button" class="item-btn" data-item="fog_top" title="霧・上">
+                                <span class="item-icon">🌫</span><span class="item-count" data-count="fog_top">0</span>
+                            </button>
+                            <button type="button" class="item-btn" data-item="fog_bottom" title="霧・下">
+                                <span class="item-icon">🌫</span><span class="item-count" data-count="fog_bottom">0</span>
+                            </button>
+                            <button type="button" class="item-btn" data-item="control_swap" title="操作混乱">
+                                <span class="item-icon">🔀</span><span class="item-count" data-count="control_swap">0</span>
+                            </button>
+                            <button type="button" class="item-btn" data-item="hide_stack" title="暗闇">
+                                <span class="item-icon">🌑</span><span class="item-count" data-count="hide_stack">0</span>
+                            </button>
+                            <button type="button" class="item-btn" data-item="shuffle_stack" title="撹乱">
+                                <span class="item-icon">🎲</span><span class="item-count" data-count="shuffle_stack">0</span>
+                            </button>
+                            <button type="button" class="item-btn item-btn-help" data-item="clear_bottom" title="最下段解除">
+                                <span class="item-icon">⬆</span><span class="item-count" data-count="clear_bottom">0</span>
+                            </button>
+                        </div>
+                        <div id="itemGetToast" class="item-get-toast hidden">get!</div>
+                    </div>
+                    <canvas id="nextCanvas" width="84" height="84"></canvas>
                 </div>
                 <div class="panel-card controls-info">
                     <h2>操作方法</h2>
@@ -161,38 +185,8 @@
                 </div>
             </div>
 
-            <!-- Right Panel: Items + Score & Level -->
+            <!-- Right Panel: Score & Level -->
             <div class="side-panel side-panel-right">
-                <div class="panel-card item-panel" id="itemPanel">
-                    <h2>アイテム</h2>
-                    <p class="item-panel-hint">タップで使用</p>
-                    <div class="item-grid" id="itemGrid">
-                        <button type="button" class="item-btn" data-item="fog_top" title="霧・上">
-                            <span class="item-icon">🌫</span><span class="item-name">上霧</span>
-                            <span class="item-count" data-count="fog_top">0</span>
-                        </button>
-                        <button type="button" class="item-btn" data-item="fog_bottom" title="霧・下">
-                            <span class="item-icon">🌫</span><span class="item-name">下霧</span>
-                            <span class="item-count" data-count="fog_bottom">0</span>
-                        </button>
-                        <button type="button" class="item-btn" data-item="control_swap" title="操作混乱">
-                            <span class="item-icon">🔀</span><span class="item-name">混乱</span>
-                            <span class="item-count" data-count="control_swap">0</span>
-                        </button>
-                        <button type="button" class="item-btn" data-item="hide_stack" title="暗闇">
-                            <span class="item-icon">🌑</span><span class="item-name">暗闇</span>
-                            <span class="item-count" data-count="hide_stack">0</span>
-                        </button>
-                        <button type="button" class="item-btn" data-item="shuffle_stack" title="撹乱">
-                            <span class="item-icon">🎲</span><span class="item-name">撹乱</span>
-                            <span class="item-count" data-count="shuffle_stack">0</span>
-                        </button>
-                        <button type="button" class="item-btn item-btn-help" data-item="clear_bottom" title="最下段解除">
-                            <span class="item-icon">⬆</span><span class="item-name">助っ人</span>
-                            <span class="item-count" data-count="clear_bottom">0</span>
-                        </button>
-                    </div>
-                </div>
                 <div class="panel-card">
                     <h2>スコア</h2>
                     <div class="score-display" id="score">0</div>

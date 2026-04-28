@@ -62,6 +62,7 @@ let effectControlSwapUntil = 0;
 let effectHideStackUntil = 0;
 let fogTopTimer = null;
 let fogBottomTimer = null;
+let itemGetToastTimer = null;
 
 const lobbyPanelEl = () => document.getElementById('lobbyPanel');
 const lobbyHintEl = () => document.getElementById('lobbyHint');
@@ -115,17 +116,25 @@ function clearItemEffectVisuals() {
 }
 
 function grantItemsFromLineClear(linesCleared) {
+    let gotAny = false;
     if (linesCleared === 2) {
         itemInventory.fog_top += 1;
         itemInventory.fog_bottom += 1;
+        gotAny = true;
     } else if (linesCleared === 3) {
         itemInventory.control_swap += 1;
         itemInventory.hide_stack += 1;
         itemInventory.clear_bottom += 1;
+        gotAny = true;
     } else if (linesCleared === 4) {
         itemInventory.shuffle_stack += 1;
+        gotAny = true;
     }
     updateItemUI();
+    if (gotAny) {
+        showItemGetToast();
+        gameAudio.playItemGet();
+    }
 }
 
 function updateItemUI() {
@@ -282,6 +291,17 @@ function setupItemControls() {
         const item = btn.getAttribute('data-item');
         if (item) useItem(item);
     });
+}
+
+function showItemGetToast() {
+    const toast = document.getElementById('itemGetToast');
+    if (!toast) return;
+    toast.classList.remove('hidden');
+    if (itemGetToastTimer) clearTimeout(itemGetToastTimer);
+    itemGetToastTimer = setTimeout(() => {
+        toast.classList.add('hidden');
+        itemGetToastTimer = null;
+    }, 900);
 }
 
 // ===== Initialize Game =====

@@ -328,24 +328,23 @@ class ChiptuneAudio {
         }, 60);
     }
 
+    playItemGet() {
+        if (this.isMuted) return;
+        const freqs = [659.25, 783.99, 987.77];
+        freqs.forEach((f, i) => {
+            setTimeout(() => this.createOscillator(f, 'square', 0.07, 0.2), i * 45);
+        });
+    }
+
     // ===== BGM: random classical loop (8-bit) =====
     /** 一時停止解除・初回など：今選ばれている曲のループ先頭から */
     startBGM() {
-        if (this.isMuted || this.isPlaying) return;
-        this.isPlaying = true;
-        if (this.activeBgmTrack === undefined || this.activeBgmTrack === null) {
-            this.activeBgmTrack = Math.floor(Math.random() * BGM_CLASSICAL_TRACKS.length);
-        }
-        this.playActiveBgmTrack();
+        return;
     }
 
     /** 対戦ラウンド開始時：毎回ランダムに1曲選ぶ */
     startBGMNewRound() {
-        this.stopBGM();
-        this.activeBgmTrack = Math.floor(Math.random() * BGM_CLASSICAL_TRACKS.length);
-        if (this.isMuted) return;
-        this.isPlaying = true;
-        this.playActiveBgmTrack();
+        return;
     }
 
     stopBGM() {

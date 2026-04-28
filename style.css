@@ -282,6 +282,34 @@ header {
     border: 2px solid var(--nes-gray);
 }
 
+.item-inline-wrap {
+    position: relative;
+    margin-bottom: 0.6rem;
+}
+
+.item-inline-title {
+    font-size: 0.45rem;
+    color: var(--nes-gray);
+    margin-bottom: 0.3rem;
+}
+
+.item-inline-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.25rem;
+}
+
+.item-get-toast {
+    position: absolute;
+    right: 0;
+    top: -0.2rem;
+    background: var(--nes-green);
+    color: #000;
+    border: 2px solid #000;
+    font-size: 0.35rem;
+    padding: 0.15rem 0.35rem;
+}
+
 /* ===== Controls Info ===== */
 .controls-info {
     font-size: 0.5rem;
@@ -673,57 +701,8 @@ header {
         grid-template-columns: 1fr;
     }
 
-    .game-container {
-        padding-bottom: 5.2rem;
-    }
+    .game-container { padding-bottom: 0; }
 
-    .side-panel-right {
-        right: auto;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: 0.35rem;
-        top: auto;
-        width: min(96vw, 460px);
-        z-index: 1600;
-    }
-
-    .side-panel-right .item-panel {
-        border-color: var(--nes-yellow);
-        padding: 0.35rem;
-        box-shadow: 0 0 0 2px #000;
-    }
-
-    .side-panel-right .item-panel h2 {
-        margin-bottom: 0.2rem;
-        color: var(--nes-yellow);
-    }
-
-    .side-panel-right .item-panel-hint {
-        font-size: 0.28rem;
-        margin-bottom: 0.2rem;
-        color: #ddd;
-    }
-
-    .side-panel-right .item-grid {
-        grid-template-columns: repeat(6, 1fr);
-        gap: 0.2rem;
-    }
-
-    .side-panel-right .item-btn {
-        min-height: 2.8rem;
-        border-color: #aaa;
-        background: #151515;
-    }
-
-    .side-panel-right .item-name {
-        font-size: 0.22rem;
-    }
-
-    .side-panel-right .item-count {
-        font-size: 0.3rem;
-    }
-
-    .side-panel-right .item-btn.item-disabled {
-        opacity: 0.72;
-    }
+    .item-inline-grid { grid-template-columns: repeat(6, 1fr); }
+    #nextCanvas { width: 72px; height: 72px; }
 }
